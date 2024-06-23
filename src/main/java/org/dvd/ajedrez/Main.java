@@ -23,6 +23,7 @@ public class Main extends Application {
         ViewBoardController controller = loader.getController();
         // Modificar el color del Rectangle
         controller.changeSizeTablero();
+        controller.putBoxes();
 
         Scene scene = new Scene(new StackPane(parent), 640, 480);
         stage.setScene(scene);
