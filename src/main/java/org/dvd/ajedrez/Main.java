@@ -6,15 +6,24 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import org.dvd.ajedrez.controller.ViewBoardController;
 
 import java.io.IOException;
+
+import static org.dvd.ajedrez.utilitis.Paths.VIEW_BOARD;
 
 public class Main extends Application {
 
 
     @Override
     public void start(Stage stage) throws IOException {
-        Parent parent = FXMLLoader.load(getClass().getResource("/view/vistaTablero.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(VIEW_BOARD));
+        Parent parent = loader.load();
+
+        ViewBoardController controller = loader.getController();
+        // Modificar el color del Rectangle
+        controller.changeSizeTablero();
+
         Scene scene = new Scene(new StackPane(parent), 640, 480);
         stage.setScene(scene);
         stage.show();

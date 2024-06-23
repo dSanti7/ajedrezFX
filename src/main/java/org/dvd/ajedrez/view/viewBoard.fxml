@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.shape.Rectangle?>
 
-<AnchorPane prefHeight="389.0" prefWidth="554.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.dvd.ajedrez.controller.VitaTableroController">
+<AnchorPane prefHeight="389.0" prefWidth="554.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.dvd.ajedrez.controller.ViewBoardController">
    <children>
       <Group fx:id="groupTablero">
          <children>
