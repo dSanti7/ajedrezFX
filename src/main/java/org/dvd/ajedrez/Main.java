@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.dvd.ajedrez.controller.ViewBoardController;
+import org.dvd.ajedrez.model.Board;
 
 import java.io.IOException;
 
@@ -20,10 +21,9 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(VIEW_BOARD));
         Parent parent = loader.load();
 
-        ViewBoardController controller = loader.getController();
-        // Modificar el color del Rectangle
-        controller.changeSizeTablero();
-        controller.putBoxes();
+        ViewBoardController viewController = loader.getController();
+
+        viewController.print();
 
         Scene scene = new Scene(new StackPane(parent), 640, 480);
         stage.setScene(scene);
