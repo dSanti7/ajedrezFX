@@ -31,9 +31,12 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/java/org/dvd/ajedrez</directory>
+                <directory>src/main/resources</directory>
             </resource>
+
         </resources>
+        <sourceDirectory>src/main/java</sourceDirectory>
+
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>

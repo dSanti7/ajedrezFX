@@ -54,7 +54,8 @@ public class ViewBoardController {
 
         //Imprimir img de fichas
         Image imgPieces = new Image( Objects.requireNonNull(getClass().getResource(CHESS_PIECES)).toExternalForm());
-        ImageView elemento = createSprite(imgPieces,0,0,98);
+        ImageView elemento = createSprite(imgPieces,piezas[0]);
+        groupBoard.getChildren().add(elemento);
     }
 
     private void changeSizeTablero() {
@@ -94,12 +95,14 @@ public class ViewBoardController {
         return rectangle;
     }
 
-    private ImageView createSprite(Image spritesheet, int x, int y, int width, int height) {
+    private ImageView createSprite(Image spritesheet, int[] pieza){
+        // int x, int y, int width, int height)
+
         ImageView imageView = new ImageView(spritesheet);
-        Rectangle2D viewportRect = new Rectangle2D(x, y, width, height);
+        Rectangle2D viewportRect = new Rectangle2D(pieza[0], pieza[1], pieza[2], pieza[3]);
         imageView.setViewport(viewportRect);
-        imageView.setFitWidth(width);
-        imageView.setFitHeight(height);
+        imageView.setFitWidth(pieza[2]);
+        imageView.setFitHeight(pieza[3]);
         imageView.setPreserveRatio(true);
         return imageView;
     }
