@@ -1,14 +1,19 @@
 package org.dvd.ajedrez.model;
 
+import javafx.scene.image.ImageView;
+
 public class Piece {
     private double x;
     private double y;
     private String tipo;
+    private ImageView imageView;
 
-    public Piece(double x, double y, String tipo) {
-        this.x = x;
-        this.y = y;
-        this.tipo = tipo;
+    public ImageView getImageView() {
+        return imageView;
+    }
+
+    public void setImageView(ImageView imageView) {
+        this.imageView = imageView;
     }
 
     public double getX() {

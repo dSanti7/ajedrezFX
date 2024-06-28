@@ -8,6 +8,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.dvd.ajedrez.model.Board;
+import org.dvd.ajedrez.model.Piece;
 
 import java.util.Objects;
 
@@ -27,18 +28,38 @@ public class ViewBoardController {
     Group groupBoard;
     Rectangle[][] boxes = new Rectangle[8][8];
     int[][] piezas = {
-            {0, 0, 98, 211},    // Peón Blanco
-            {98, 0, 98, 211},   // Torre Blanca
-            {196, 0, 98, 211},  // Alfil Blanco
-            {294, 0, 98, 211},  // Caballo Blanco
-            {392, 0, 98, 211},  // Reina Blanca
-            {490, 0, 98, 211},  // Rey Blanco
-            {0, 211, 98, 211},  // Peón Negro
             {98, 211, 98, 211}, // Torre Negra
+            {294, 211, 98, 211},// Caballo Negro
+            {196, 211, 98, 211},// Alfil Negro
+            {392, 211, 98, 211},// Reina Negra
+            {490, 211, 98, 211}, // Rey Negro
             {196, 211, 98, 211},// Alfil Negro
             {294, 211, 98, 211},// Caballo Negro
-            {392, 211, 98, 211},// Reina Negra
-            {490, 211, 98, 211} // Rey Negro
+            {98, 211, 98, 211}, // Torre Negra
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 211, 98, 211},  // Peón Negro
+            {0, 0, 98, 211},    // Peón Blanco
+            {0, 0, 98, 211},    // Peón Blanco
+            {0, 0, 98, 211},    // Peón Blanco
+            {0, 0, 98, 211},    // Peón Blanco
+            {0, 0, 98, 211},    // Peón Blanco
+            {0, 0, 98, 211},    // Peón Blanco
+            {0, 0, 98, 211},    // Peón Blanco
+            {0, 0, 98, 211},    // Peón Blanco
+            {98, 0, 98, 211},   // Torre Blanca
+            {294, 0, 98, 211},  // Caballo Blanco
+            {196, 0, 98, 211},  // Alfil Blanco
+            {392, 0, 98, 211},  // Reina Blanca
+            {490, 0, 98, 211},  // Rey Blanco
+            {196, 0, 98, 211},  // Alfil Blanco
+            {294, 0, 98, 211},  // Caballo Blanco
+            {98, 0, 98, 211},   // Torre Blanca
     };
 
     public ViewBoardController() {
@@ -53,9 +74,51 @@ public class ViewBoardController {
         printBoard();
 
         //Imprimir img de fichas
-        Image imgPieces = new Image( Objects.requireNonNull(getClass().getResource(CHESS_PIECES)).toExternalForm());
-        ImageView elemento = createSprite(imgPieces,piezas[0]);
-        groupBoard.getChildren().add(elemento);
+        printChessPieces();
+    }
+
+    private void printChessPieces() {
+
+        //imagenes de fichas negras
+        Image imgPieces = new Image(Objects.requireNonNull(getClass().getResource(CHESS_PIECES)).toExternalForm());
+        int x = 0;
+        int y = 0;
+        for (int i = 0; i < 16; i++) {
+//            System.out.println("i:"+i+" x:"+x+" y:"+y);
+            ImageView imageView = createSprite(imgPieces, piezas[i], boxes[x][y]);
+            Piece piece = new Piece();
+            piece.setImageView(imageView);
+            groupBoard.getChildren().add(imageView);
+            board.setBlackPiece(piece, i);
+            ++x;
+            if (x == 8) {
+                x = 0;
+                y = 1;
+            }
+        }
+
+        //Imagenes de fichas blancas
+        x = 0;
+        y = 6;
+        for (int i = 16; i < 32; i++) {
+            ImageView imageView = createSprite(imgPieces, piezas[i], boxes[x][y]);
+
+            Piece piece = new Piece();
+            piece.setX(x);
+            piece.setY(y);
+            piece.setImageView(imageView);
+
+            board.setWhitePiece(piece, i - 16);
+            x++;
+            if (x == 8) {
+                x = 0;
+                y = 7;
+            }
+
+            //Añadimos img al tablero
+            groupBoard.getChildren().add(imageView);
+        }
+
     }
 
     private void changeSizeTablero() {
@@ -95,14 +158,21 @@ public class ViewBoardController {
         return rectangle;
     }
 
-    private ImageView createSprite(Image spritesheet, int[] pieza){
+    private ImageView createSprite(Image spritesheet, int[] pieza, Rectangle rectangle) {
         // int x, int y, int width, int height)
 
         ImageView imageView = new ImageView(spritesheet);
         Rectangle2D viewportRect = new Rectangle2D(pieza[0], pieza[1], pieza[2], pieza[3]);
         imageView.setViewport(viewportRect);
-        imageView.setFitWidth(pieza[2]);
-        imageView.setFitHeight(pieza[3]);
+        int widthPiece = 18;
+        int heightPiece = 30;
+        imageView.setFitWidth(widthPiece);
+        imageView.setFitHeight(heightPiece);
+        double size = rectangle.getHeight();
+        double paddingWidth = (size - widthPiece) / 2;
+        double paddingHeight = (size - heightPiece) / 2;
+        imageView.setX(paddingWidth + rectangle.getX());
+        imageView.setY(paddingHeight + rectangle.getY());
         imageView.setPreserveRatio(true);
         return imageView;
     }
