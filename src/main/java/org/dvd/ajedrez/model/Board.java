@@ -1,83 +1,89 @@
 package org.dvd.ajedrez.model;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 public class Board {
     private static Board board;
-    private static Piece[] whitePieces;
-    private static Piece[] blackPieces;
-
-    private Box[][] boxes = new Box[8][8];
+    private static List<Piece> pieceList;
 
 
     public static Board start() {
         if (board == null) {
             board = new Board();
         }
-        whitePieces = new Piece[16];
-        blackPieces = new Piece[16];
+
         return board;
     }
 
     private Board() {
+        initPieces();
+    }
+
+    private void initPieces() {
+        pieceList = new LinkedList<>();
+        //   Fichas negras
+        Piece towerLeftBlack = new Piece(1, 0, 0, "T","B");
+        Piece horseLeftBlack = new Piece(2, 1, 0, "H","B");
+        Piece bishopLeftBlack = new Piece(3, 2, 0, "B","B");
+        Piece queenBlack = new Piece(4, 3, 0, "Q","B");
+        Piece kingBlack = new Piece(5, 4, 0, "K","B");
+        Piece bishopRightBlack = new Piece(6, 5, 0, "B","B");
+        Piece horseRightBlack = new Piece(7, 6, 0, "H","B");
+        Piece towerRightBlack = new Piece(8, 7, 0, "T","B");
+
+        Piece pawnBlack1 = new Piece(9, 0, 1, "P","B");
+        Piece pawnBlack2 = new Piece(10, 1, 1, "P","B");
+        Piece pawnBlack3 = new Piece(11, 2, 1, "P","B");
+        Piece pawnBlack4 = new Piece(12, 3, 1, "P","B");
+        Piece pawnBlack5 = new Piece(13, 4, 1, "P","B");
+        Piece pawnBlack6 = new Piece(14, 5, 1, "P","B");
+        Piece pawnBlack7 = new Piece(15, 6, 1, "P","B");
+        Piece pawnBlack8 = new Piece(16, 7, 1, "P","B");
+        pieceList.addAll(Stream.of(towerLeftBlack, horseLeftBlack, bishopLeftBlack, queenBlack, kingBlack, bishopRightBlack,
+                horseRightBlack, towerRightBlack, pawnBlack1, pawnBlack2, pawnBlack3, pawnBlack4, pawnBlack5, pawnBlack6, pawnBlack7, pawnBlack8).toList());
+        //Fichas Blancas
+
+        Piece towerLeftWhite = new Piece(17, 0, 7, "T","W");
+        Piece horseLeftWhite = new Piece(18, 1, 7, "H","W");
+        Piece bishopLeftWhite = new Piece(19, 2, 7, "B","W");
+        Piece queenWhite = new Piece(20, 3, 7, "Q","W");
+        Piece kingWhite = new Piece(21, 4, 7, "K","W");
+        Piece bishopRightWhite = new Piece(22, 5, 7, "B","W");
+        Piece horseRightWhite = new Piece(23, 6, 7, "H","W");
+        Piece towerRightWhite = new Piece(24, 7, 7, "T","W");
+
+        Piece pawnWhite1 = new Piece(25, 0, 6, "P","W");
+        Piece pawnWhite2 = new Piece(26, 1, 6, "P","W");
+        Piece pawnWhite3 = new Piece(27, 2, 6, "P","W");
+        Piece pawnWhite4 = new Piece(28, 3, 6, "P","W");
+        Piece pawnWhite5 = new Piece(29, 4, 6, "P","W");
+        Piece pawnWhite6 = new Piece(30, 5, 6, "P","W");
+        Piece pawnWhite7 = new Piece(31, 6, 6, "P","W");
+        Piece pawnWhite8 = new Piece(32, 7, 6, "P","W");
+        pieceList.addAll(Stream.of(towerLeftWhite, horseLeftWhite, bishopLeftWhite, queenWhite, kingWhite, bishopRightWhite,
+                horseRightWhite, towerRightWhite, pawnWhite1, pawnWhite2, pawnWhite3, pawnWhite4, pawnWhite5, pawnWhite6, pawnWhite7, pawnWhite8).toList());
 
     }
 
-    public void setWhitePiece(Piece piece, int position) {
-        whitePieces[position] = piece;
-    }
+    public void updatePiece(Input input){
+        int id = input.getIdPiece();
+        Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
 
-    public void setBlackPiece(Piece piece, int position) {
-        blackPieces[position] = piece;
-    }
-
-    public void setPieces() {
-
-
-        //Fichas negras
-//        Piece towerLeftBlack = new Piece(0,0,"T");
-//
-//        Piece horseLeftBlack = new Piece(1,0,"H");
-//        Piece bishopLeftBlack = new Piece(2,0,"B");
-//        Piece queenBlack = new Piece(3,0,"Q");
-//        Piece kingBlack = new Piece(4,0,"K");
-//        Piece bishopRightBlack = new Piece(5,0,"B");
-//        Piece horseRightBlack = new Piece(6,0,"H");
-//        Piece towerRightBlack = new Piece(7,0,"T");
-//
-//        Piece pawnBlack1 = new Piece(0,1,"P");
-//        Piece pawnBlack2 = new Piece(1,1,"P");
-//        Piece pawnBlack3 = new Piece(2,1,"P");
-//        Piece pawnBlack4 = new Piece(3,1,"P");
-//        Piece pawnBlack5 = new Piece(4,1,"P");
-//        Piece pawnBlack6 = new Piece(5,1,"P");
-//        Piece pawnBlack7 = new Piece(6,1,"P");
-//        Piece pawnBlack8 = new Piece(7,1,"P");
-//        white = new Piece[]{towerLeftBlack, horseLeftBlack, bishopLeftBlack, queenBlack, kingBlack,
-//                bishopRightBlack, horseRightBlack, towerRightBlack,pawnBlack1,pawnBlack2,pawnBlack3,
-//                pawnBlack4,pawnBlack5,pawnBlack6,pawnBlack7,pawnBlack8};
-//
-//        //Fichas Blancas
-//
-//        Piece towerLeftWhite = new Piece(0,7,"T");
-//        Piece horseLeftWhite = new Piece(1,7,"H");
-//        Piece bishopLeftWhite = new Piece(2,7,"B");
-//        Piece queenWhite = new Piece(3,7,"Q");
-//        Piece kingWhite = new Piece(4,7,"K");
-//        Piece bishopRightWhite = new Piece(5,7,"B");
-//        Piece horseRightWhite = new Piece(6,7,"H");
-//        Piece towerRightWhite = new Piece(7,7,"T");
-//
-//        Piece pawnWhite1 = new Piece(0,6,"P");
-//        Piece pawnWhite2 = new Piece(1,6,"P");
-//        Piece pawnWhite3 = new Piece(2,6,"P");
-//        Piece pawnWhite4 = new Piece(3,6,"P");
-//        Piece pawnWhite5 = new Piece(4,6,"P");
-//        Piece pawnWhite6 = new Piece(5,6,"P");
-//        Piece pawnWhite7 = new Piece(6,6,"P");
-//        Piece pawnWhite8 = new Piece(7,6,"P");
-//
-//        black =  new Piece[]{towerLeftWhite, horseLeftWhite, bishopLeftWhite, queenWhite, kingWhite,
-//                bishopRightWhite, horseRightWhite, towerRightWhite,pawnWhite1,pawnWhite2,pawnWhite3,
-//                pawnWhite4,pawnWhite5,pawnWhite6,pawnWhite7,pawnWhite8};
+        if(thePiece.isEmpty()){
+            return;
+        }
+        //comprobamos si es un movimiento valido
+        if (!thePiece.get().canMovePiece(input.getNewPosition())){
+            //no se puede mover
+            //todo crear logs de información
+            return;
+        }
+        //Actualizamos estado de la ficha
+        Position newPosition = input.getNewPosition();
+        thePiece.get().setPosition(newPosition);
     }
 
 }

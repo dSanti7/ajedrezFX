@@ -5,6 +5,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.dvd.ajedrez.model.Board;
@@ -27,6 +28,9 @@ public class ViewBoardController {
     @FXML
     Group groupBoard;
     Rectangle[][] boxes = new Rectangle[8][8];
+    String [] tipos = {
+            "T","C","A","Q","K","A","C","T","P","P","P","P","P","P","P","P",
+            "P","P","P","P","P","P","P","P","T","C","A","Q","K","A","C","T"};
     int[][] piezas = {
             {98, 211, 98, 211}, // Torre Negra
             {294, 211, 98, 211},// Caballo Negro
@@ -87,9 +91,15 @@ public class ViewBoardController {
 //            System.out.println("i:"+i+" x:"+x+" y:"+y);
             ImageView imageView = createSprite(imgPieces, piezas[i], boxes[x][y]);
             Piece piece = new Piece();
-            piece.setImageView(imageView);
+//            piece.setX(x);
+//            piece.setY(y);
+           // piece.setImageView(imageView);
+            piece.setTipo(tipos[i]);
+
+            //Evento cuando se hace clic
+            imageView.setOnMouseClicked(event -> handleMouseClick(event));
             groupBoard.getChildren().add(imageView);
-            board.setBlackPiece(piece, i);
+//            board.setBlackPiece(piece, i);
             ++x;
             if (x == 8) {
                 x = 0;
@@ -104,11 +114,12 @@ public class ViewBoardController {
             ImageView imageView = createSprite(imgPieces, piezas[i], boxes[x][y]);
 
             Piece piece = new Piece();
-            piece.setX(x);
-            piece.setY(y);
-            piece.setImageView(imageView);
+//            piece.setX(x);
+//            piece.setY(y);
+           // piece.setImageView(imageView);
+            piece.setTipo(tipos[i]);
 
-            board.setWhitePiece(piece, i - 16);
+//            board.setWhitePiece(piece, i - 16);
             x++;
             if (x == 8) {
                 x = 0;
@@ -118,6 +129,11 @@ public class ViewBoardController {
             //Añadimos img al tablero
             groupBoard.getChildren().add(imageView);
         }
+
+    }
+
+    private void handleMouseClick(MouseEvent event) {
+
 
     }
 
