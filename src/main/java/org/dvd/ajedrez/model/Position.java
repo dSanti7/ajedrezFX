@@ -16,6 +16,7 @@ public class Position {
         return x;
     }
 
+
     public void setX(int x) {
         this.x = x;
     }
@@ -24,8 +25,27 @@ public class Position {
         return y;
     }
 
+
     public void setY(int y) {
         this.y = y;
+    }
+
+    public boolean isValid() {
+        return x >= 0 && x <= 15 && y >= 0 && y <= 15;
+    }
+
+    public boolean isValid(int plusX, int plusY) {
+        //Si sale fuera del tablero
+        int newX = x + plusX;
+        int newY = y + plusY;
+        return newX >= 0 && newX <= 15 && newY >= 0 && newY <= 15;
+    }
+
+    public boolean compareToAndValid(Position newPosition, int plusX, int plusY) {
+        if (isValid(plusX, plusY)) {
+            return newPosition.equals(this);
+        }
+        return false;
     }
 
     @Override
