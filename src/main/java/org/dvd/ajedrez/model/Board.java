@@ -79,11 +79,15 @@ public class Board {
         }
         //comprobamos si es un movimiento valido
         if (!thePiece.get().canPieceMove(input.getNewPosition())) {
-            //no se puede mover
-            output.setError("No se puede mover la ficha");
+            if(!thePiece.get().getTipo().equals("K")){//no se puede mover
+                output.setError("No se puede mover la ficha");
 
-            //todo crear logs de información
-            return output;
+                //todo crear logs de información
+                return output;
+            }else{
+                //Se produce tablas
+                output.setError("Tablas");
+            }
         }
 
         String theColor = thePiece.get().getColor();
@@ -120,7 +124,7 @@ public class Board {
 
         pieceList.stream()
                 .filter(piece -> !theColor.equals(piece.getColor()))
-                .peek(piece -> piece.canPieceMove(ourKing.getPosition()))
+                .filter(piece -> piece.canPieceMove(ourKing.getPosition()))
                 .findAny().ifPresent(
                         piece -> {
                             enemyPiece.ifPresent(pieceEnemy -> piece.setDead(false));
@@ -131,7 +135,7 @@ public class Board {
 
          //Si el rey enemigo no tiene movimientos donde pueda moverse
         // y es amenazado por otra ficha
-        enemyKing.getPositionKing().stream()
+        enemyKing.getKingMoves().stream()
                 .filter(enemyKing::canPieceMove)
                 .findAny().ifPresentOrElse(piece -> {},
                         () -> {

@@ -109,14 +109,14 @@ public class Piece {
                 }
                 break;
             case "K"://Rey
-                Optional<Position> kingPosition = getPositionKing().stream()
+                Optional<Position> kingPosition = getKingMoves().stream()
                         .filter(position1 -> position1.equals(newPosition)).findAny();
                 if (kingPosition.isPresent()) {
                     return true;
                 }
                 break;
             case "P"://Peon
-                Optional<Position> pawnPosition = getPositionPawn().stream()
+                Optional<Position> pawnPosition = getPawnMoves().stream()
                         .filter(position1 -> position1.equals(newPosition)).findAny();
                 if (pawnPosition.isPresent()) {
                     return true;
@@ -127,7 +127,7 @@ public class Piece {
         return false;
     }
 
-    public List<Position> getPositionKing() {
+    public List<Position> getKingMoves() {
         List<Position> positions = new LinkedList<>();
 
         positions.add(new Position(position.getX() + 1, position.getY()));
@@ -143,7 +143,7 @@ public class Piece {
         return positions.stream().filter(Position::isValid).toList();
     }
 
-    public List<Position> getPositionPawn() {
+    public List<Position> getPawnMoves() {
         List<Position> positions = new LinkedList<>();
 
         //Black
@@ -161,5 +161,52 @@ public class Piece {
         }
 
         return positions.stream().filter(Position::isValid).toList();
+    }
+
+    public List<Position> getBishopMoves() {
+        List<Position> positions = new LinkedList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (Math.abs(i - position.getX()) ==
+                        Math.abs(j - position.getY())) {
+                    positions.add(new Position(i, j));
+                }
+            }
+        }
+        return positions.stream().filter(Position::isValid).toList();
+    }
+
+    public List<Position> getQueenMoves() {
+        List<Position> positions = new LinkedList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (Math.abs(i - position.getX()) ==
+                        Math.abs(j - position.getY())
+                ) {
+                    positions.add(new Position(i, j));
+                } else {
+                    if (i == position.getX()
+                            || j == position.getY()) {
+                        positions.add(new Position(i, j));
+                    }
+                }
+            }
+        }
+        return positions.stream().filter(Position::isValid).toList();
+    }
+
+    public List<Position> getHorseMoves() {
+        List<Position> positions = new LinkedList<>();
+        positions.add(new Position(position.getX() + 1, position.getY() + 3));
+        positions.add(new Position(position.getX() - 1, position.getY() + 3));
+        positions.add(new Position(position.getX() + 3, position.getY() - 1));
+        positions.add(new Position(position.getX() + 3, position.getY() + 1));
+        positions.add(new Position(position.getX() + 1, position.getY() - 3));
+        positions.add(new Position(position.getX() - 1, position.getY() - 3));
+        positions.add(new Position(position.getX() - 3, position.getY() + 1));
+        positions.add(new Position(position.getX() + 3, position.getY() - 1));
+
+        return positions.stream().filter(Position::isValid).toList();
+
     }
 }
