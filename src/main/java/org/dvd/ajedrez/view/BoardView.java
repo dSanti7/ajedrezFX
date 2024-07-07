@@ -4,15 +4,26 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import org.dvd.ajedrez.model.Board;
+import org.dvd.ajedrez.model.Input;
+import org.dvd.ajedrez.model.Output;
+import org.dvd.ajedrez.model.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
 import static org.dvd.ajedrez.utilitis.Paths.CHESS_PIECES;
 
+
 public class BoardView {
     private static BoardView boardView;
+    private Board board;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BoardView.class);
+    private BoxView selectedboxes;
 
     public static BoardView start() {
         if (boardView == null) {
@@ -22,7 +33,12 @@ public class BoardView {
         return boardView;
     }
 
-    int[][] piezas = {
+    public BoardView() {
+        boxViews = new BoxView[8][8];
+
+    }
+
+    private final int[][] positionsPiecesInit = {
             {98, 211, 98, 211}, // Torre Negra
             {294, 211, 98, 211},// Caballo Negro
             {196, 211, 98, 211},// Alfil Negro
@@ -56,19 +72,23 @@ public class BoardView {
             {294, 0, 98, 211},  // Caballo Blanco
             {98, 0, 98, 211},   // Torre Blanca
     };
-    Rectangle[][] boxes = new Rectangle[8][8];
+    private BoxView[][] boxViews;
 
     public void printChessPieces(Group groupBoard) {
-
-        //imagenes de fichas negras
+        board = Board.start();
+        //Cargamos img de fichas negras y blancas
         Image imgPieces = new Image(Objects.requireNonNull(getClass().getResource(CHESS_PIECES)).toExternalForm());
         int x = 0;
         int y = 0;
         for (int i = 0; i < 16; i++) {
+            PieceView pieceView = new PieceView();
+            ImageView imageView = createSprite(imgPieces, positionsPiecesInit[i], boxViews[x][y].getBoxSelected());
+            pieceView.setImageView(imageView);
+            pieceView.setX(x);
+            pieceView.setY(y);
+            pieceView.setId(i);
 
-            ImageView imageView = createSprite(imgPieces, piezas[i], boxes[x][y]);
-
-            //Evento cuando se hace clic
+            boxViews[x][y].setPieceView(pieceView);
 
             groupBoard.getChildren().add(imageView);
 
@@ -84,7 +104,17 @@ public class BoardView {
         x = 0;
         y = 6;
         for (int i = 16; i < 32; i++) {
-            ImageView imageView = createSprite(imgPieces, piezas[i], boxes[x][y]);
+            PieceView pieceView = new PieceView();
+
+            ImageView imageView = createSprite(imgPieces, positionsPiecesInit[i], boxViews[x][y].getBoxSelected());
+
+            pieceView.setImageView(imageView);
+            pieceView.setX(x);
+            pieceView.setY(y);
+            pieceView.setId(i);
+
+            boxViews[x][y].setPieceView(pieceView);
+
             x++;
             if (x == 8) {
                 x = 0;
@@ -123,18 +153,29 @@ public class BoardView {
 
         boolean isColor = false;
 
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                BoxView boxView = new BoxView();
+
                 Color color = isColor ? Color.BLACK : Color.WHITE;
-                boxes[i][j] = createRectangle(sizeBox, color, i, j,imgBoard,groupBoard);
-                groupBoard.getChildren().add(boxes[i][j]);
+                Rectangle boxChess = createRectangle(sizeBox, color, x, y, imgBoard);
+
+                Rectangle selectedBox = createRectangleSelected(sizeBox, x, y, imgBoard);
+                boxView.setBoxSelected(selectedBox);
+                boxView.setX(x);
+                boxView.setY(y);
+                selectedBox.setOnMouseClicked(event -> handleRectangleClick(event, boxView));
+                groupBoard.getChildren().add(boxChess);
+                groupBoard.getChildren().add(boxView.getBoxSelected());
+
+                boxViews[x][y] = boxView;
                 isColor = !isColor;
             }
             isColor = !isColor;
         }
     }
 
-    private Rectangle createRectangle(int sizeBox, Color color, int i, int j, Rectangle imgBoard, Group groupBoard) {
+    private Rectangle createRectangle(int sizeBox, Color color, int i, int j, Rectangle imgBoard) {
         double xBoard = imgBoard.getLayoutX();
         double yBoard = imgBoard.getLayoutY();
         Rectangle rectangle = new Rectangle(xBoard + (i * sizeBox), yBoard + (j * sizeBox), sizeBox, sizeBox);
@@ -145,6 +186,77 @@ public class BoardView {
         rectangle.toFront();
         return rectangle;
     }
+
+    private Rectangle createRectangleSelected(int sizeBox, int i, int j, Rectangle imgBoard) {
+        double xBoard = imgBoard.getLayoutX();
+        double yBoard = imgBoard.getLayoutY();
+        Rectangle rectangle = new Rectangle(xBoard + (i * sizeBox), yBoard + (j * sizeBox), sizeBox, sizeBox);
+        Color paint = new Color(0.13, 1.0, 0.246, 0.0);
+        rectangle.setFill(paint);
+        rectangle.toFront();
+        return rectangle;
+    }
+
+    private void handleRectangleClick(MouseEvent event, BoxView boxView) {
+
+        //deseleccionamos casilla
+        if(selectedboxes!=null && boxView.getX() == selectedboxes.getX() && boxView.getY() == selectedboxes.getY()){
+            LOGGER.info("x"+boxView.getX()+" y"+ boxView.getY()+" - x"+selectedboxes.getX()+" y"+selectedboxes.getY());
+            LOGGER.info("a"+boxView.getPieceView().getId()+
+                    " b"+selectedboxes.getPieceView().getId());
+            //quitamos el color a la casilla seleccionada
+            Color paint = new Color(0.13, 1.0, 0.246, 0);
+            selectedboxes.getBoxSelected().setFill(paint);
+
+            //Quitamos selección
+            selectedboxes = null;
+            return;
+
+        }
+        //comprobar que la primera seleccion es una ficha
+        if (boxView.getPieceView() == null && selectedboxes == null) {
+            return;
+        }
+        //Si hemos seleccionado la segunda casilla comprobamos que podemos mover
+        if (selectedboxes != null) {
+            Input input = new Input();
+            input.setIdPiece(selectedboxes.getPieceView().getId());
+            input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
+            input.setNewPosition(new Position(boxView.getX(), boxView.getY()));
+            Output output = board.updatePiece(input);
+            if (output.getError() == null || output.getError().isEmpty()) {
+
+                boxView.setPieceView(selectedboxes.getPieceView());
+                selectedboxes.setPieceView(null);
+                int widthPiece = 18;
+                int heightPiece = 30;
+                double size = boxView.getBoxSelected().getHeight();
+                double paddingWidth = (size - widthPiece) / 2;
+                double paddingHeight = (size - heightPiece) / 2;
+
+                boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
+                boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
+
+
+                //mover ficha
+
+                //quitamos el color a la casilla seleccionada
+                Color paint = new Color(0.13, 1.0, 0.246, 0);
+                selectedboxes.getBoxSelected().setFill(paint);
+
+                //Quitamos selección
+                selectedboxes = null;
+            }
+        } else {
+            Color paint = new Color(0.13, 1.0, 0.246, 0.2132);
+            boxView.getBoxSelected().setFill(paint);
+            selectedboxes = boxView;
+        }
+        //hacer función deseleccionar
+
+
+    }
+
     public void changeSizeTablero(Rectangle imgBoard) {
         int size = (int) imgBoard.getHeight();
         int realSize = size / 8;

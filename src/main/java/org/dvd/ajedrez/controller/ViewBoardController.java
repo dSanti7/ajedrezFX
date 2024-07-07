@@ -17,11 +17,11 @@ public class ViewBoardController {
     @FXML
     Group groupBoard;
 
-    private Board board;
+
     private BoardView boardView;
 
     public ViewBoardController() {
-        board = Board.start();
+
         boardView = BoardView.start();
     }
 
@@ -37,5 +37,6 @@ public class ViewBoardController {
         boardView.printChessPieces(groupBoard);
 
     }
+
 
 }

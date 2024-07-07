@@ -145,7 +145,7 @@ public class Board {
                         });
 
         //Actualizamos estado de la ficha
-        if (output.getError().isEmpty()) {
+        if (output.getError()==null || output.getError().isEmpty()) {
             Position newPosition = input.getNewPosition();
             thePiece.get().setPosition(newPosition);
         }
