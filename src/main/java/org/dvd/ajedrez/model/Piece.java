@@ -88,17 +88,36 @@ public class Piece {
         this.tipo = tipo;
     }
 
+    public List<Position> getMoves(List<Piece> pieceList) {
+        return switch (tipo) {
+            case "T" ->//Torre
+                    getTowerMoves(pieceList);
+            case "H" ->//Caballo
+                    getHorseMoves();
+            case "B" ->//Alfil
+                    getBishopMoves();
+            case "Q" ->//Reina
+                    getQueenMoves();
+            case "K" ->//Rey
+                    getKingMoves();
+            case "P" ->//Peon
+                    getPawnMoves();
+            default -> null;
+        };
+
+    }
+
     public boolean canPieceMove(Position newPosition) {
         if (newPosition.equals(position)) {
             return false;
         }
         switch (tipo) {
             case "T"://Torre
-                Optional<Position> towerPosition = getTowerMoves().stream()
-                        .filter(position1 -> position1.equals(newPosition)).findAny();
-                if (towerPosition.isPresent()) {
-                    return true;
-                }
+//                Optional<Position> towerPosition = getTowerMoves(pieceList).stream()
+//                        .filter(position1 -> position1.equals(newPosition)).findAny();
+//                if (towerPosition.isPresent()) {
+//                    return true;
+//                }
 
                 break;
             case "H"://Caballo
@@ -224,17 +243,81 @@ public class Piece {
         return positions.stream().filter(Position::isValid).toList();
     }
 
-    public List<Position> getTowerMoves() {
+    public List<Position> getTowerMoves(List<Piece> pieceList) {
         List<Position> positions = new LinkedList<>();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (i == position.getX()
-                        || j == position.getY()) {
-                    positions.add(new Position(i, j));
-                }
-            }
-        }
+        //mirar x derecha
+        int numAttackEnemies = 0;
+        for (int x = position.getX() + 1; x < 8; x++) {
 
+            boolean isAllie = false;
+            for (Piece piece : pieceList) {
+                if (!piece.getColor().equals(color) && piece.getPosition().equals(new Position(x, position.getY()))) {
+                    numAttackEnemies++;
+                } else if (piece.getColor().equals(color) && piece.getPosition().equals(new Position(x, position.getY()))) {
+                    isAllie = true;
+                    break;
+                }
+
+            }
+            if (isAllie || numAttackEnemies > 1) {
+                break;
+            }
+            positions.add(new Position(x, position.getY()));
+        }
+        numAttackEnemies = 0;
+        //mirar x izquierda
+        for (int x = position.getX() - 1; x >= 0; x--) {
+            boolean isAllie = false;
+            for (Piece piece : pieceList) {
+                if (!piece.getColor().equals(color) && piece.getPosition().equals(new Position(x, position.getY()))) {
+                    numAttackEnemies++;
+                } else if (piece.getColor().equals(color) && piece.getPosition().equals(new Position(x, position.getY()))) {
+                    isAllie = true;
+                    break;
+                }
+
+            }
+            if (isAllie || numAttackEnemies > 1) {
+                break;
+            }
+            positions.add(new Position(x, position.getY()));
+        }
+        numAttackEnemies = 0;
+        //mirar y arriba
+        for (int y = position.getY() - 1; y >= 0; y--) {
+            boolean isAllie = false;
+            for (Piece piece : pieceList) {
+                if (!piece.getColor().equals(color) && piece.getPosition().equals(new Position(position.getX(), y))) {
+                    numAttackEnemies++;
+                } else if (piece.getColor().equals(color) && piece.getPosition().equals(new Position(position.getX(), y))) {
+                    isAllie = true;
+                    break;
+                }
+
+            }
+            if (isAllie || numAttackEnemies > 1) {
+                break;
+            }
+            positions.add(new Position(position.getX(), y));
+        }
+        numAttackEnemies = 0;
+        //mirar y debajo
+        for (int y = position.getY() + 1; y < 8; y++) {
+            boolean isAllie = false;
+            for (Piece piece : pieceList) {
+                if (!piece.getColor().equals(color) && piece.getPosition().equals(new Position(position.getX(), y))) {
+                    numAttackEnemies++;
+                } else if (piece.getColor().equals(color) && piece.getPosition().equals(new Position(position.getX(), y))) {
+                    isAllie = true;
+                    break;
+                }
+
+            }
+            if (isAllie || numAttackEnemies > 1) {
+                break;
+            }
+            positions.add(new Position(position.getX(), y));
+        }
         return positions.stream().filter(Position::isValid).toList();
 
     }

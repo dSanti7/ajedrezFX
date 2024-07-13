@@ -1,11 +1,16 @@
 package org.dvd.ajedrez.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Board {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Board.class);
+
     private static Board board;
     private static List<Piece> pieceList;
 
@@ -72,12 +77,25 @@ public class Board {
         Output output = new Output();
         int id = input.getIdPiece();
         Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
+        Optional<Piece> auxPiece = pieceList.stream().filter(piece -> piece.getPosition().equals(input.getNewPosition())).findAny();
 
         if (thePiece.isEmpty()) {
             output.setError("No se encontró la ficha indicada");
             return output;
         }
         //comprobamos si es un movimiento valido
+        List<Position> theMoves = thePiece.get().getMoves(pieceList);
+
+        LOGGER.info("MOVIMIENTOS DE PIEZA - {}",theMoves);
+        //devuelve las posiciones de los enemigos
+        List<Position> positionList = pieceList.stream()
+                .filter(piece -> !piece.getColor().equals(thePiece.get().getColor()))
+                .map(Piece::getPosition).toList();
+
+        theMoves.stream()
+                .filter(position -> position.equals(input.getNewPosition()))
+                .filter(position -> positionList.stream().anyMatch(position1 -> position1.equals(position)))
+                .findAny();
         if (!thePiece.get().canPieceMove(input.getNewPosition())) {
             if (!thePiece.get().getTipo().equals("K")) {//no se puede mover
                 output.setError("No se puede mover la ficha");
@@ -141,7 +159,8 @@ public class Board {
         // y es amenazado por otra ficha
         enemyKing.getKingMoves().stream()
                 .filter(enemyKing::canPieceMove)
-                .findAny().ifPresentOrElse(piece -> {},
+                .findAny().ifPresentOrElse(piece -> {
+                        },
                         () -> {
                             if (output.isCheckKing()) {
                                 output.setWinnerColor(theColor);
