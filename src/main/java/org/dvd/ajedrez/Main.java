@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.dvd.ajedrez.controller.ViewBoardController;
-import org.dvd.ajedrez.model.Board;
 
 import java.io.IOException;
 

@@ -86,7 +86,7 @@ public class BoardView {
             pieceView.setImageView(imageView);
             pieceView.setX(x);
             pieceView.setY(y);
-            pieceView.setId(i);
+            pieceView.setId(i + 1);
 
             boxViews[x][y].setPieceView(pieceView);
 
@@ -111,7 +111,7 @@ public class BoardView {
             pieceView.setImageView(imageView);
             pieceView.setX(x);
             pieceView.setY(y);
-            pieceView.setId(i);
+            pieceView.setId(i + 1);
 
             boxViews[x][y].setPieceView(pieceView);
 
@@ -199,11 +199,12 @@ public class BoardView {
 
     private void handleRectangleClick(MouseEvent event, BoxView boxView) {
 
+
         //deseleccionamos casilla
-        if(selectedboxes!=null && boxView.getX() == selectedboxes.getX() && boxView.getY() == selectedboxes.getY()){
-            LOGGER.info("x"+boxView.getX()+" y"+ boxView.getY()+" - x"+selectedboxes.getX()+" y"+selectedboxes.getY());
-            LOGGER.info("a"+boxView.getPieceView().getId()+
-                    " b"+selectedboxes.getPieceView().getId());
+        if (selectedboxes != null && boxView.getX() == selectedboxes.getX() && boxView.getY() == selectedboxes.getY()) {
+            LOGGER.info("x" + boxView.getX() + " y" + boxView.getY() + " - x" + selectedboxes.getX() + " y" + selectedboxes.getY());
+            LOGGER.info("a" + boxView.getPieceView().getId() +
+                    " b" + selectedboxes.getPieceView().getId());
             //quitamos el color a la casilla seleccionada
             Color paint = new Color(0.13, 1.0, 0.246, 0);
             selectedboxes.getBoxSelected().setFill(paint);
@@ -213,17 +214,25 @@ public class BoardView {
             return;
 
         }
+        LOGGER.info("Posición x" + boxView.getX() + " y" + boxView.getY());
+
         //comprobar que la primera seleccion es una ficha
         if (boxView.getPieceView() == null && selectedboxes == null) {
             return;
         }
         //Si hemos seleccionado la segunda casilla comprobamos que podemos mover
         if (selectedboxes != null) {
+            LOGGER.info("Posición x" + boxView.getX() + " y" + boxView.getY());
+            LOGGER.info("Posición caja 2 x" + selectedboxes.getX() + " y" + selectedboxes.getY());
             Input input = new Input();
+            //todo corregir movimientos de fichas blancas
+            //todo corregir que una ficha no salte a otra excepto el caballo
+            //todo corregir que una ficha no se ponga encima de una ficha del mismo color
             input.setIdPiece(selectedboxes.getPieceView().getId());
             input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
             input.setNewPosition(new Position(boxView.getX(), boxView.getY()));
             Output output = board.updatePiece(input);
+            LOGGER.info(output.toString());
             if (output.getError() == null || output.getError().isEmpty()) {
 
                 boxView.setPieceView(selectedboxes.getPieceView());

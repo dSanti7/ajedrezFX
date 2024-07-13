@@ -3,7 +3,6 @@ package org.dvd.ajedrez.controller;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.shape.Rectangle;
-import org.dvd.ajedrez.model.Board;
 import org.dvd.ajedrez.view.BoardView;
 
 

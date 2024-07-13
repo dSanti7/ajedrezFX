@@ -1,7 +1,6 @@
 package org.dvd.ajedrez.view;
 
 
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class BoxView {
@@ -11,7 +10,7 @@ public class BoxView {
     private int x;
     private int y;
     private boolean isSelected;
-   // private Color paint = new Color(0.13, 1.0, 0.246, 0.18);
+
 
 
     public PieceView getPieceView() {

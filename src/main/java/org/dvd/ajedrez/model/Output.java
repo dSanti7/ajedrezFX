@@ -11,7 +11,9 @@ public class Output {
     private String error; // indica si hay algún problema con el movimiento
 
     private boolean draw; // indicador si hay tablas
-    public void restart(int idPiece, String color){
+    private String information; // información de salida
+
+    public void restart(int idPiece, String color) {
         this.idPiece = idPiece;
         this.color = color;
         idPieceAux = -1;
@@ -83,5 +85,28 @@ public class Output {
 
     public void setError(String error) {
         this.error = error;
+    }
+
+    public String getInformation() {
+        return information;
+    }
+
+    public void setInformation(String information) {
+        this.information = information;
+    }
+
+    @Override
+    public String toString() {
+        return "Output{" +
+                "idPiece=" + idPiece +
+                ", color='" + color + '\'' +
+                ", idPieceAux=" + idPieceAux +
+                ", idPieceDeleted=" + idPieceDeleted +
+                ", winnerColor='" + winnerColor + '\'' +
+                ", checkKing=" + checkKing +
+                ", error='" + error + '\'' +
+                ", draw=" + draw + '\'' +
+                ", information=" + information +
+                '}';
     }
 }

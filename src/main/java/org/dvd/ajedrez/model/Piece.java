@@ -1,16 +1,23 @@
 package org.dvd.ajedrez.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 public class Piece {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Piece.class);
+
     private int id;
 
     private Position position;
     private String tipo;
     private String color;
     private boolean isDead;
+    private boolean attack;
+    private boolean fistMovement;
 
     public Piece(int id, int x, int y, String tipo, String color) {
         this.id = id;
@@ -20,8 +27,25 @@ public class Piece {
         this.isDead = false;
     }
 
+
     public Piece() {
 
+    }
+
+    public boolean isFistMovement() {
+        return fistMovement;
+    }
+
+    public void setFistMovement(boolean fistMovement) {
+        this.fistMovement = fistMovement;
+    }
+
+    public boolean isAttack() {
+        return attack;
+    }
+
+    public void setAttack(boolean attack) {
+        this.attack = attack;
     }
 
     public String getColor() {
@@ -70,43 +94,37 @@ public class Piece {
         }
         switch (tipo) {
             case "T"://Torre
-                if (newPosition.getX() == position.getX()
-                        || newPosition.getY() == position.getY()) {
+                Optional<Position> towerPosition = getTowerMoves().stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (towerPosition.isPresent()) {
                     return true;
                 }
 
                 break;
             case "H"://Caballo
-
-                if ((newPosition.getX() == position.getX() + 1 && newPosition.getY() == position.getY() + 3)
-                        || (newPosition.getX() == position.getX() - 1 && newPosition.getY() == position.getY() + 3)
-                        || (newPosition.getX() == position.getX() + 3 && newPosition.getY() == position.getY() - 1)
-                        || (newPosition.getX() == position.getX() + 3 && newPosition.getY() == position.getY() + 1)
-                        || (newPosition.getX() == position.getX() + 1 && newPosition.getY() == position.getY() - 3)
-                        || (newPosition.getX() == position.getX() - 1 && newPosition.getY() == position.getY() - 3)
-                        || (newPosition.getX() == position.getX() - 3 && newPosition.getY() == position.getY() + 1)
-                        || (newPosition.getX() == position.getX() - 3 && newPosition.getY() == position.getY() - 1)
-                ) {
-
+                Optional<Position> horsePosition = getHorseMoves().stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                LOGGER.info("Posición {}", position);
+                LOGGER.info("movimientos de caballo {}", getHorseMoves().toString());
+                if (horsePosition.isPresent()) {
                     return true;
                 }
+                break;
             case "B"://Alfil
-                if (Math.abs(newPosition.getX() - position.getX()) ==
-                        Math.abs(newPosition.getY() - position.getY())) {
+                Optional<Position> bishopMove = getBishopMoves().stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (bishopMove.isPresent()) {
                     return true;
                 }
 
                 break;
             case "Q"://Reina
-                if (Math.abs(newPosition.getX() - position.getX()) ==
-                        Math.abs(newPosition.getY() - position.getY())) {
+                Optional<Position> queenPosition = getQueenMoves().stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (queenPosition.isPresent()) {
                     return true;
-                } else {
-                    if (newPosition.getX() == position.getX()
-                            || newPosition.getY() == position.getY()) {
-                        return true;
-                    }
                 }
+
                 break;
             case "K"://Rey
                 Optional<Position> kingPosition = getKingMoves().stream()
@@ -149,14 +167,25 @@ public class Piece {
         //Black
         if (color.equals("B")) {
             positions.add(new Position(position.getX(), position.getY() + 1));
-            positions.add(new Position(position.getX() + 1, position.getY() + 1));
-            positions.add(new Position(position.getX() - 1, position.getY() + 1));
+            if (attack) {
+                positions.add(new Position(position.getX() + 1, position.getY() + 1));
+                positions.add(new Position(position.getX() - 1, position.getY() + 1));
+            }
+            if (fistMovement) {
+                positions.add(new Position(position.getX(), position.getY() + 2));
+            }
         }
         //White
         if (color.equals("W")) {
             positions.add(new Position(position.getX(), position.getY() - 1));
-            positions.add(new Position(position.getX() + 1, position.getY() - 1));
-            positions.add(new Position(position.getX() - 1, position.getY() - 1));
+            if (attack) {
+                positions.add(new Position(position.getX() + 1, position.getY() - 1));
+                positions.add(new Position(position.getX() - 1, position.getY() - 1));
+            }
+            if (fistMovement) {
+                positions.add(new Position(position.getX(), position.getY() - 2));
+
+            }
 
         }
 
@@ -195,18 +224,44 @@ public class Piece {
         return positions.stream().filter(Position::isValid).toList();
     }
 
-    public List<Position> getHorseMoves() {
+    public List<Position> getTowerMoves() {
         List<Position> positions = new LinkedList<>();
-        positions.add(new Position(position.getX() + 1, position.getY() + 3));
-        positions.add(new Position(position.getX() - 1, position.getY() + 3));
-        positions.add(new Position(position.getX() + 3, position.getY() - 1));
-        positions.add(new Position(position.getX() + 3, position.getY() + 1));
-        positions.add(new Position(position.getX() + 1, position.getY() - 3));
-        positions.add(new Position(position.getX() - 1, position.getY() - 3));
-        positions.add(new Position(position.getX() - 3, position.getY() + 1));
-        positions.add(new Position(position.getX() + 3, position.getY() - 1));
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (i == position.getX()
+                        || j == position.getY()) {
+                    positions.add(new Position(i, j));
+                }
+            }
+        }
 
         return positions.stream().filter(Position::isValid).toList();
 
+    }
+
+    public List<Position> getHorseMoves() {
+        List<Position> positions = new LinkedList<>();
+        positions.add(new Position(position.getX() + 1, position.getY() + 2));
+        positions.add(new Position(position.getX() - 1, position.getY() + 2));
+        positions.add(new Position(position.getX() + 2, position.getY() - 1));
+        positions.add(new Position(position.getX() + 2, position.getY() + 1));
+        positions.add(new Position(position.getX() + 1, position.getY() - 2));
+        positions.add(new Position(position.getX() - 1, position.getY() - 2));
+        positions.add(new Position(position.getX() - 2, position.getY() + 1));
+        positions.add(new Position(position.getX() - 2, position.getY() - 1));
+
+        return positions.stream().filter(Position::isValid).toList();
+
+    }
+
+    @Override
+    public String toString() {
+        return "Piece{" +
+                "id=" + id +
+                ", position=" + position +
+                ", tipo='" + tipo + '\'' +
+                ", color='" + color + '\'' +
+                ", isDead=" + isDead +
+                '}';
     }
 }

@@ -79,12 +79,12 @@ public class Board {
         }
         //comprobamos si es un movimiento valido
         if (!thePiece.get().canPieceMove(input.getNewPosition())) {
-            if(!thePiece.get().getTipo().equals("K")){//no se puede mover
+            if (!thePiece.get().getTipo().equals("K")) {//no se puede mover
                 output.setError("No se puede mover la ficha");
 
                 //todo crear logs de información
                 return output;
-            }else{
+            } else {
                 //Se produce tablas
                 output.setError("Tablas");
             }
@@ -111,11 +111,15 @@ public class Board {
                         && piece.getTipo().equals("K")).findAny().get();
 
 
-        pieceList.stream()
-                .filter(piece -> theColor.equals(piece.getColor()))
-                .peek(piece -> piece.canPieceMove(enemyKing.getPosition()))
-                .findAny().ifPresent(piece -> output.setCheckKing(true));
+        Stream<Piece> pieceStream = pieceList.stream()
+                .filter(piece -> !theColor.equals(piece.getColor()))
+                .filter(piece -> piece.canPieceMove(enemyKing.getPosition()));
 
+        pieceStream.findAny().ifPresent(piece -> {
+            output.setCheckKing(true);
+            String info = output.getInformation();
+            output.setInformation(info + " " + piece);
+        });
 
         //Comprobar si nuestro rey es amenazado
         Piece ourKing = pieceList.stream().filter(piece ->
@@ -133,7 +137,7 @@ public class Board {
                         }
                 );
 
-         //Si el rey enemigo no tiene movimientos donde pueda moverse
+        //Si el rey enemigo no tiene movimientos donde pueda moverse
         // y es amenazado por otra ficha
         enemyKing.getKingMoves().stream()
                 .filter(enemyKing::canPieceMove)
@@ -145,7 +149,7 @@ public class Board {
                         });
 
         //Actualizamos estado de la ficha
-        if (output.getError()==null || output.getError().isEmpty()) {
+        if (output.getError() == null || output.getError().isEmpty()) {
             Position newPosition = input.getNewPosition();
             thePiece.get().setPosition(newPosition);
         }
