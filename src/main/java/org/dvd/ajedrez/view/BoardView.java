@@ -133,8 +133,8 @@ public class BoardView {
         ImageView imageView = new ImageView(spritesheet);
         Rectangle2D viewportRect = new Rectangle2D(pieza[0], pieza[1], pieza[2], pieza[3]);
         imageView.setViewport(viewportRect);
-        int widthPiece = 18;
-        int heightPiece = 30;
+        int widthPiece = 23;
+        int heightPiece = 35;
         imageView.setFitWidth(widthPiece);
         imageView.setFitHeight(heightPiece);
         double size = rectangle.getHeight();
@@ -200,7 +200,7 @@ public class BoardView {
     private void handleRectangleClick(MouseEvent event, BoxView boxView) {
 
 
-        //deseleccionamos casilla
+        //desseleccionamos casilla
         if (selectedboxes != null && boxView.getX() == selectedboxes.getX() && boxView.getY() == selectedboxes.getY()) {
             LOGGER.info("x" + boxView.getX() + " y" + boxView.getY() + " - x" + selectedboxes.getX() + " y" + selectedboxes.getY());
             LOGGER.info("a" + boxView.getPieceView().getId() +

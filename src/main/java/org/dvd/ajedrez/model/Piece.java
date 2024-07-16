@@ -3,9 +3,12 @@ package org.dvd.ajedrez.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class Piece {
     private static final Logger LOGGER = LoggerFactory.getLogger(Piece.class);
@@ -93,13 +96,13 @@ public class Piece {
             case "T" ->//Torre
                     getTowerMoves(pieceList);
             case "H" ->//Caballo
-                    getHorseMoves();
+                    getHorseMoves(pieceList);
             case "B" ->//Alfil
-                    getBishopMoves();
+                    getBishopMoves(pieceList);
             case "Q" ->//Reina
-                    getQueenMoves();
+                    getQueenMoves(pieceList);
             case "K" ->//Rey
-                    getKingMoves();
+                    getKingMoves(pieceList);
             case "P" ->//Peon
                     getPawnMoves();
             default -> null;
@@ -121,36 +124,36 @@ public class Piece {
 
                 break;
             case "H"://Caballo
-                Optional<Position> horsePosition = getHorseMoves().stream()
-                        .filter(position1 -> position1.equals(newPosition)).findAny();
-                LOGGER.info("Posición {}", position);
-                LOGGER.info("movimientos de caballo {}", getHorseMoves().toString());
-                if (horsePosition.isPresent()) {
-                    return true;
-                }
+//                Optional<Position> horsePosition = getHorseMoves(pieceList).stream()
+//                        .filter(position1 -> position1.equals(newPosition)).findAny();
+//                LOGGER.info("Posición {}", position);
+//                LOGGER.info("movimientos de caballo {}", getHorseMoves(pieceList).toString());
+//                if (horsePosition.isPresent()) {
+//                    return true;
+//                }
                 break;
             case "B"://Alfil
-                Optional<Position> bishopMove = getBishopMoves().stream()
-                        .filter(position1 -> position1.equals(newPosition)).findAny();
-                if (bishopMove.isPresent()) {
-                    return true;
-                }
+//                Optional<Position> bishopMove = getBishopMoves(pieceList).stream()
+//                        .filter(position1 -> position1.equals(newPosition)).findAny();
+//                if (bishopMove.isPresent()) {
+//                    return true;
+//                }
 
                 break;
             case "Q"://Reina
-                Optional<Position> queenPosition = getQueenMoves().stream()
-                        .filter(position1 -> position1.equals(newPosition)).findAny();
-                if (queenPosition.isPresent()) {
-                    return true;
-                }
+//                Optional<Position> queenPosition = getQueenMoves(pieceList).stream()
+//                        .filter(position1 -> position1.equals(newPosition)).findAny();
+//                if (queenPosition.isPresent()) {
+//                    return true;
+//                }
 
                 break;
             case "K"://Rey
-                Optional<Position> kingPosition = getKingMoves().stream()
-                        .filter(position1 -> position1.equals(newPosition)).findAny();
-                if (kingPosition.isPresent()) {
-                    return true;
-                }
+//                Optional<Position> kingPosition = getKingMoves(pieceList).stream()
+//                        .filter(position1 -> position1.equals(newPosition)).findAny();
+//                if (kingPosition.isPresent()) {
+//                    return true;
+//                }
                 break;
             case "P"://Peon
                 Optional<Position> pawnPosition = getPawnMoves().stream()
@@ -164,7 +167,7 @@ public class Piece {
         return false;
     }
 
-    public List<Position> getKingMoves() {
+    public List<Position> getKingMoves(List<Piece> pieceList) {
         List<Position> positions = new LinkedList<>();
 
         positions.add(new Position(position.getX() + 1, position.getY()));
@@ -176,8 +179,22 @@ public class Piece {
         positions.add(new Position(position.getX() - 1, position.getY() - 1));
         positions.add(new Position(position.getX(), position.getY() - 1));
 
+        List<Position> salida = new ArrayList<>(positions.stream().toList());
 
-        return positions.stream().filter(Position::isValid).toList();
+        for (Position position1 : positions) {
+
+            for (Piece piece : pieceList) {
+                if (piece.getColor().equals(color) && piece.getPosition().equals(position1)) {
+
+                    salida.remove(position1);
+                    break;
+                }
+            }
+
+        }
+
+
+        return salida.stream().filter(Position::isValid).toList();
     }
 
     public List<Position> getPawnMoves() {
@@ -211,36 +228,75 @@ public class Piece {
         return positions.stream().filter(Position::isValid).toList();
     }
 
-    public List<Position> getBishopMoves() {
-        List<Position> positions = new LinkedList<>();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (Math.abs(i - position.getX()) ==
-                        Math.abs(j - position.getY())) {
-                    positions.add(new Position(i, j));
-                }
-            }
-        }
-        return positions.stream().filter(Position::isValid).toList();
-    }
-
-    public List<Position> getQueenMoves() {
-        List<Position> positions = new LinkedList<>();
+    public List<Position> getBishopMoves(List<Piece> pieceList) {
+        List<Position> listPosition1 = new ArrayList<>();
+        List<Position> listPosition2 = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (Math.abs(i - position.getX()) ==
                         Math.abs(j - position.getY())
-                ) {
-                    positions.add(new Position(i, j));
-                } else {
-                    if (i == position.getX()
-                            || j == position.getY()) {
-                        positions.add(new Position(i, j));
+                        && i != position.getX() && j != position.getY()) {
+
+                    if (i - position.getX() + j - position.getY() == 0) {
+                        //izq abajo  - arriba derecha
+                        listPosition1.add(new Position(i, j));
+                    } else {
+                        //izq arriba - abajo derecha
+                        listPosition2.add(new Position(i, j));
                     }
                 }
             }
         }
-        return positions.stream().filter(Position::isValid).toList();
+
+
+        List<Position> alliesPosition1 =  listPosition1.stream()
+                .filter(position1 -> pieceList.stream().filter(piece -> piece.getColor().equals(color))
+                        .filter(piece -> piece.getPosition().getX() != position.getX() && piece.getPosition().getY() != position.getY())
+                        .map(Piece::getPosition).anyMatch(position2 -> position2.equals(position1)))
+                .sorted(Comparator.comparingInt(position1 -> position1.getX() + position1.getY()))
+                .toList() ;
+
+
+        List<Position> alliesPosition2 = listPosition2.stream()
+                .filter(position1 -> pieceList.stream().filter(piece -> piece.getColor().equals(color))
+                        .map(Piece::getPosition).anyMatch(position2 -> position2.equals(position1)))
+                .sorted(Comparator.comparingInt(position1 -> position1.getX() + position1.getY()))
+                .toList();
+
+        List<Position> salida  = new LinkedList<>();
+        for (Position postAllies : alliesPosition1) {
+
+            int xAllie = postAllies.getX() - position.getX();
+            if (xAllie < 0) {
+                salida = listPosition1.stream().filter(position1 -> xAllie < position1.getX() - position.getX()).toList();
+            } else {
+                salida = listPosition1.stream().filter(position1 -> xAllie > position1.getX() - position.getX()).toList();
+            }
+
+        }
+        List<Position> salida2  = new LinkedList<>();
+        for (Position postAllies : alliesPosition2) {
+
+            int positionAllie = postAllies.getX() - position.getX() + postAllies.getY() - position.getY();
+            if (positionAllie < 0) {
+                salida2 = alliesPosition2.stream().filter(position1 -> positionAllie < position1.getX() - position.getX() + position1.getY() - position.getY()).toList();
+            } else {
+                salida2 = alliesPosition2.stream().filter(position1 -> positionAllie > position1.getX() - position.getX() + position1.getY() - position.getY()).toList();
+            }
+
+        }
+
+
+        //Todo filtro de casillas cuando hay enemigos.
+
+
+        return Stream.concat(salida.stream(), salida2.stream()).filter(Position::isValid).toList();
+    }
+
+    public List<Position> getQueenMoves(List<Piece> pieceList) {
+        List<Position> towerMoves = getTowerMoves(pieceList);
+        List<Position> bishopMoves = getBishopMoves(pieceList);
+        return Stream.concat(towerMoves.stream(),bishopMoves.stream()).toList();
     }
 
     public List<Position> getTowerMoves(List<Piece> pieceList) {
@@ -322,7 +378,7 @@ public class Piece {
 
     }
 
-    public List<Position> getHorseMoves() {
+    public List<Position> getHorseMoves(List<Piece> pieceList) {
         List<Position> positions = new LinkedList<>();
         positions.add(new Position(position.getX() + 1, position.getY() + 2));
         positions.add(new Position(position.getX() - 1, position.getY() + 2));
@@ -333,7 +389,21 @@ public class Piece {
         positions.add(new Position(position.getX() - 2, position.getY() + 1));
         positions.add(new Position(position.getX() - 2, position.getY() - 1));
 
-        return positions.stream().filter(Position::isValid).toList();
+        for (Position position1 : positions) {
+            boolean isAllie = false;
+            for (Piece piece : pieceList) {
+                if (piece.getColor().equals(color) && piece.getPosition().equals(position1)) {
+                    isAllie = true;
+                    positions.remove(position1);
+                    break;
+                }
+            }
+            if (isAllie) {
+                break;
+            }
+        }
+        return positions.stream().filter(Position::isValid)
+                .toList();
 
     }
 

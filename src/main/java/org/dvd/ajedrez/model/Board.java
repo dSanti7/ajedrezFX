@@ -157,7 +157,7 @@ public class Board {
 
         //Si el rey enemigo no tiene movimientos donde pueda moverse
         // y es amenazado por otra ficha
-        enemyKing.getKingMoves().stream()
+        enemyKing.getKingMoves(pieceList).stream()
                 .filter(enemyKing::canPieceMove)
                 .findAny().ifPresentOrElse(piece -> {
                         },

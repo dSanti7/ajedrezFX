@@ -31,7 +31,7 @@ public class Position {
     }
 
     public boolean isValid() {
-        return x >= 0 && x <= 15 && y >= 0 && y <= 15;
+        return x >= 0 && x < 8 && y >= 0 && y < 8;
     }
 
     public boolean isValid(int plusX, int plusY) {
