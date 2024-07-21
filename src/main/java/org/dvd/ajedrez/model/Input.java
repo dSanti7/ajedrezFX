@@ -30,4 +30,13 @@ private Position newPosition;
     public void setNewPosition(Position newPosition) {
         this.newPosition = newPosition;
     }
+
+    @Override
+    public String toString() {
+        return "Input{" +
+                "idPiece=" + idPiece +
+                ", actualPosition=" + actualPosition +
+                ", newPosition=" + newPosition +
+                '}';
+    }
 }

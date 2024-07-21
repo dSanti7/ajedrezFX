@@ -199,12 +199,11 @@ public class BoardView {
 
     private void handleRectangleClick(MouseEvent event, BoxView boxView) {
 
-
+        LOGGER.info("handleRectangleClick - boxView x" + boxView.getX() + " y" + boxView.getY() + " - selectedboxes x" + selectedboxes.getX() + " y" + selectedboxes.getY());
+        LOGGER.info("handleRectangleClick - id boxView a" + boxView.getPieceView().getId() + "selectedboxes b" + selectedboxes.getPieceView().getId());
         //desseleccionamos casilla
         if (selectedboxes != null && boxView.getX() == selectedboxes.getX() && boxView.getY() == selectedboxes.getY()) {
-            LOGGER.info("x" + boxView.getX() + " y" + boxView.getY() + " - x" + selectedboxes.getX() + " y" + selectedboxes.getY());
-            LOGGER.info("a" + boxView.getPieceView().getId() +
-                    " b" + selectedboxes.getPieceView().getId());
+
             //quitamos el color a la casilla seleccionada
             Color paint = new Color(0.13, 1.0, 0.246, 0);
             selectedboxes.getBoxSelected().setFill(paint);
@@ -214,7 +213,6 @@ public class BoardView {
             return;
 
         }
-        LOGGER.info("Posición x" + boxView.getX() + " y" + boxView.getY());
 
         //comprobar que la primera seleccion es una ficha
         if (boxView.getPieceView() == null && selectedboxes == null) {
@@ -222,8 +220,7 @@ public class BoardView {
         }
         //Si hemos seleccionado la segunda casilla comprobamos que podemos mover
         if (selectedboxes != null) {
-            LOGGER.info("Posición x" + boxView.getX() + " y" + boxView.getY());
-            LOGGER.info("Posición caja 2 x" + selectedboxes.getX() + " y" + selectedboxes.getY());
+
             Input input = new Input();
             //todo corregir movimientos de fichas blancas
             //todo corregir que una ficha no salte a otra excepto el caballo
@@ -232,7 +229,7 @@ public class BoardView {
             input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
             input.setNewPosition(new Position(boxView.getX(), boxView.getY()));
             Output output = board.updatePiece(input);
-            LOGGER.info(output.toString());
+            LOGGER.info("handleRectangleClick - Resultado {}",output.toString());
             if (output.getError() == null || output.getError().isEmpty()) {
 
                 boxView.setPieceView(selectedboxes.getPieceView());
@@ -261,8 +258,6 @@ public class BoardView {
             boxView.getBoxSelected().setFill(paint);
             selectedboxes = boxView;
         }
-        //hacer función deseleccionar
-
 
     }
 

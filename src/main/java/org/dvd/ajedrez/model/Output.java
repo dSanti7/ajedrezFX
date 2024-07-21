@@ -1,6 +1,7 @@
 package org.dvd.ajedrez.model;
 
 public class Output {
+    private boolean isCorrect; // variable que indica que es correcto el movimeinto
     private int idPiece; // Se devuelve la ficha movida
     private String color; // Color de la ficha que movió
     private int idPieceAux; //Se indica cuando hay más de una ficha movida
@@ -21,6 +22,15 @@ public class Output {
         winnerColor = null;
         checkKing = false;
         error = null;
+        isCorrect = true;
+    }
+
+    public boolean isCorrect() {
+        return isCorrect;
+    }
+
+    public void setCorrect(boolean correct) {
+        isCorrect = correct;
     }
 
     public boolean isDraw() {

@@ -92,7 +92,9 @@ public class Piece {
     }
 
     public List<Position> getMoves(List<Piece> pieceList) {
-        return switch (tipo) {
+
+        LOGGER.info("Posición {}", position);
+         return switch (tipo) {
             case "T" ->//Torre
                     getTowerMoves(pieceList);
             case "H" ->//Caballo
@@ -110,50 +112,48 @@ public class Piece {
 
     }
 
-    public boolean canPieceMove(Position newPosition) {
+    public boolean canPieceMove(Position newPosition, List<Piece> pieceList) {
         if (newPosition.equals(position)) {
             return false;
         }
         switch (tipo) {
             case "T"://Torre
-//                Optional<Position> towerPosition = getTowerMoves(pieceList).stream()
-//                        .filter(position1 -> position1.equals(newPosition)).findAny();
-//                if (towerPosition.isPresent()) {
-//                    return true;
-//                }
+                Optional<Position> towerPosition = getTowerMoves(pieceList).stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (towerPosition.isPresent()) {
+                    return true;
+                }
 
                 break;
             case "H"://Caballo
-//                Optional<Position> horsePosition = getHorseMoves(pieceList).stream()
-//                        .filter(position1 -> position1.equals(newPosition)).findAny();
-//                LOGGER.info("Posición {}", position);
-//                LOGGER.info("movimientos de caballo {}", getHorseMoves(pieceList).toString());
-//                if (horsePosition.isPresent()) {
-//                    return true;
-//                }
+                Optional<Position> horsePosition = getHorseMoves(pieceList).stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (horsePosition.isPresent()) {
+                    return true;
+                }
                 break;
             case "B"://Alfil
-//                Optional<Position> bishopMove = getBishopMoves(pieceList).stream()
-//                        .filter(position1 -> position1.equals(newPosition)).findAny();
-//                if (bishopMove.isPresent()) {
-//                    return true;
-//                }
+                Optional<Position> bishopMove = getBishopMoves(pieceList).stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (bishopMove.isPresent()) {
+                    return true;
+                }
 
                 break;
             case "Q"://Reina
-//                Optional<Position> queenPosition = getQueenMoves(pieceList).stream()
-//                        .filter(position1 -> position1.equals(newPosition)).findAny();
-//                if (queenPosition.isPresent()) {
-//                    return true;
-//                }
+                Optional<Position> queenPosition = getQueenMoves(pieceList).stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (queenPosition.isPresent()) {
+                    return true;
+                }
 
                 break;
             case "K"://Rey
-//                Optional<Position> kingPosition = getKingMoves(pieceList).stream()
-//                        .filter(position1 -> position1.equals(newPosition)).findAny();
-//                if (kingPosition.isPresent()) {
-//                    return true;
-//                }
+                Optional<Position> kingPosition = getKingMoves(pieceList).stream()
+                        .filter(position1 -> position1.equals(newPosition)).findAny();
+                if (kingPosition.isPresent()) {
+                    return true;
+                }
                 break;
             case "P"://Peon
                 Optional<Position> pawnPosition = getPawnMoves().stream()

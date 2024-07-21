@@ -50,35 +50,38 @@ public class Board {
         pieceList.addAll(Stream.of(towerLeftBlack, horseLeftBlack, bishopLeftBlack, queenBlack, kingBlack, bishopRightBlack,
                 horseRightBlack, towerRightBlack, pawnBlack1, pawnBlack2, pawnBlack3, pawnBlack4, pawnBlack5, pawnBlack6, pawnBlack7, pawnBlack8).toList());
         //Fichas Blancas
+        Piece pawnWhite1 = new Piece(17, 0, 6, "P", "W");
+        Piece pawnWhite2 = new Piece(18, 1, 6, "P", "W");
+        Piece pawnWhite3 = new Piece(19, 2, 6, "P", "W");
+        Piece pawnWhite4 = new Piece(20, 3, 6, "P", "W");
+        Piece pawnWhite5 = new Piece(21, 4, 6, "P", "W");
+        Piece pawnWhite6 = new Piece(22, 5, 6, "P", "W");
+        Piece pawnWhite7 = new Piece(23, 6, 6, "P", "W");
+        Piece pawnWhite8 = new Piece(24, 7, 6, "P", "W");
+        Piece towerLeftWhite = new Piece(25, 0, 7, "T", "W");
+        Piece horseLeftWhite = new Piece(26, 1, 7, "H", "W");
+        Piece bishopLeftWhite = new Piece(27, 2, 7, "B", "W");
+        Piece queenWhite = new Piece(28, 3, 7, "Q", "W");
+        Piece kingWhite = new Piece(29, 4, 7, "K", "W");
+        Piece bishopRightWhite = new Piece(30, 5, 7, "B", "W");
+        Piece horseRightWhite = new Piece(31, 6, 7, "H", "W");
+        Piece towerRightWhite = new Piece(32, 7, 7, "T", "W");
 
-        Piece towerLeftWhite = new Piece(17, 0, 7, "T", "W");
-        Piece horseLeftWhite = new Piece(18, 1, 7, "H", "W");
-        Piece bishopLeftWhite = new Piece(19, 2, 7, "B", "W");
-        Piece queenWhite = new Piece(20, 3, 7, "Q", "W");
-        Piece kingWhite = new Piece(21, 4, 7, "K", "W");
-        Piece bishopRightWhite = new Piece(22, 5, 7, "B", "W");
-        Piece horseRightWhite = new Piece(23, 6, 7, "H", "W");
-        Piece towerRightWhite = new Piece(24, 7, 7, "T", "W");
 
-        Piece pawnWhite1 = new Piece(25, 0, 6, "P", "W");
-        Piece pawnWhite2 = new Piece(26, 1, 6, "P", "W");
-        Piece pawnWhite3 = new Piece(27, 2, 6, "P", "W");
-        Piece pawnWhite4 = new Piece(28, 3, 6, "P", "W");
-        Piece pawnWhite5 = new Piece(29, 4, 6, "P", "W");
-        Piece pawnWhite6 = new Piece(30, 5, 6, "P", "W");
-        Piece pawnWhite7 = new Piece(31, 6, 6, "P", "W");
-        Piece pawnWhite8 = new Piece(32, 7, 6, "P", "W");
         pieceList.addAll(Stream.of(towerLeftWhite, horseLeftWhite, bishopLeftWhite, queenWhite, kingWhite, bishopRightWhite,
                 horseRightWhite, towerRightWhite, pawnWhite1, pawnWhite2, pawnWhite3, pawnWhite4, pawnWhite5, pawnWhite6, pawnWhite7, pawnWhite8).toList());
 
     }
 
     public Output updatePiece(Input input) {
-        Output output = new Output();
+        LOGGER.info("updatePiece - Entrada : {}",input);
         int id = input.getIdPiece();
-        Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
-        Optional<Piece> auxPiece = pieceList.stream().filter(piece -> piece.getPosition().equals(input.getNewPosition())).findAny();
 
+        Output output = new Output();
+        output.setIdPiece(id);
+        output.setCorrect(true);
+
+        Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
         if (thePiece.isEmpty()) {
             output.setError("No se encontró la ficha indicada");
             return output;
@@ -86,26 +89,12 @@ public class Board {
         //comprobamos si es un movimiento valido
         List<Position> theMoves = thePiece.get().getMoves(pieceList);
 
-        LOGGER.info("MOVIMIENTOS DE PIEZA - {}",theMoves);
-        //devuelve las posiciones de los enemigos
-        List<Position> positionList = pieceList.stream()
-                .filter(piece -> !piece.getColor().equals(thePiece.get().getColor()))
-                .map(Piece::getPosition).toList();
+        LOGGER.info("MOVIMIENTOS DE PIEZA - {}", theMoves);
 
-        theMoves.stream()
-                .filter(position -> position.equals(input.getNewPosition()))
-                .filter(position -> positionList.stream().anyMatch(position1 -> position1.equals(position)))
-                .findAny();
-        if (!thePiece.get().canPieceMove(input.getNewPosition())) {
-            if (!thePiece.get().getTipo().equals("K")) {//no se puede mover
-                output.setError("No se puede mover la ficha");
-
-                //todo crear logs de información
-                return output;
-            } else {
-                //Se produce tablas
-                output.setError("Tablas");
-            }
+        if (theMoves.stream().noneMatch(position -> position.equals(input.getNewPosition()))) {
+            output.setCorrect(false);
+            output.setError("La posición no es posible");
+            return output;
         }
 
         String theColor = thePiece.get().getColor();
@@ -113,14 +102,15 @@ public class Board {
         output.setIdPiece(thePiece.get().getId());
 
         //comprobamos si mata a alguna ficha
+        List<Piece> pieces = pieceList.stream().filter(piece -> theMoves.stream().anyMatch(position -> piece.getPosition().equals(position))).toList();
+        Optional<Piece> enemy = pieces.stream().filter(piece -> piece.getPosition().equals(input.getNewPosition())  && !piece.getColor().equals(theColor)).findAny();
 
-        Optional<Piece> enemyPiece = pieceList.stream().filter(piece -> piece.getPosition().getX() == input.getNewPosition().getX()
-                && piece.getPosition().getY() == input.getNewPosition().getY()
-                && piece.getColor().equals(theColor)).findAny();
-        //Matamos a una ficha
-        enemyPiece.ifPresent(piece -> {
-            piece.setDead(true);
-            output.setIdPieceDeleted(piece.getId());
+        //Si hay enemigo y es un movimiento valido
+        enemy.ifPresent(piece -> {
+                //Matamos a una ficha
+                piece.setDead(true);
+                output.setIdPieceDeleted(piece.getId());
+
         });
 
         //Comprobamos si el rey enemigo es amenazado
@@ -129,11 +119,11 @@ public class Board {
                         && piece.getTipo().equals("K")).findAny().get();
 
 
-        Stream<Piece> pieceStream = pieceList.stream()
+        Optional<Piece> pieceStream = pieceList.stream()
                 .filter(piece -> !theColor.equals(piece.getColor()))
-                .filter(piece -> piece.canPieceMove(enemyKing.getPosition()));
+                .filter(piece -> piece.canPieceMove(enemyKing.getPosition(), pieceList)).findAny();
 
-        pieceStream.findAny().ifPresent(piece -> {
+        pieceStream.ifPresent(piece -> {
             output.setCheckKing(true);
             String info = output.getInformation();
             output.setInformation(info + " " + piece);
@@ -146,29 +136,19 @@ public class Board {
 
         pieceList.stream()
                 .filter(piece -> !theColor.equals(piece.getColor()))
-                .filter(piece -> piece.canPieceMove(ourKing.getPosition()))
+                .filter(piece -> piece.canPieceMove(ourKing.getPosition(), pieceList))
                 .findAny().ifPresent(
                         piece -> {
-                            enemyPiece.ifPresent(pieceEnemy -> piece.setDead(false));
+                            enemy.ifPresent(pieceEnemy -> piece.setDead(false));
                             output.restart(thePiece.get().getId(), theColor);
                             output.setError("No se puede mover porque genera jaque en contra");
+                            output.setCorrect(false);
                         }
                 );
 
-        //Si el rey enemigo no tiene movimientos donde pueda moverse
-        // y es amenazado por otra ficha
-        enemyKing.getKingMoves(pieceList).stream()
-                .filter(enemyKing::canPieceMove)
-                .findAny().ifPresentOrElse(piece -> {
-                        },
-                        () -> {
-                            if (output.isCheckKing()) {
-                                output.setWinnerColor(theColor);
-                            }
-                        });
 
         //Actualizamos estado de la ficha
-        if (output.getError() == null || output.getError().isEmpty()) {
+        if ((output.getError() == null || output.getError().isEmpty()) && output.isCorrect()) {
             Position newPosition = input.getNewPosition();
             thePiece.get().setPosition(newPosition);
         }
