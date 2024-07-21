@@ -202,8 +202,8 @@ public class BoardView {
 
         //desseleccionamos casilla
         if (selectedboxes != null && boxView.getX() == selectedboxes.getX() && boxView.getY() == selectedboxes.getY()) {
-            LOGGER.info("handleRectangleClick - boxView x" + boxView.getX() + " y" + boxView.getY() + " - selectedboxes x" + selectedboxes.getX() + " y" + selectedboxes.getY());
-            LOGGER.info("handleRectangleClick - id boxView a" + boxView.getPieceView().getId() + "selectedboxes b" + selectedboxes.getPieceView().getId());
+            LOGGER.info("handleRectangleClick - boxView x:" + boxView.getX() + " y:" + boxView.getY() + " - selectedboxes x:" + selectedboxes.getX() + " y:" + selectedboxes.getY());
+            LOGGER.info("handleRectangleClick - id boxView: " + boxView.getPieceView().getId() + " selectedboxes:" + selectedboxes.getPieceView().getId());
             //quitamos el color a la casilla seleccionada
             Color paint = new Color(0.13, 1.0, 0.246, 0);
             selectedboxes.getBoxSelected().setFill(paint);
@@ -222,10 +222,12 @@ public class BoardView {
         if (selectedboxes != null) {
 
             Input input = new Input();
-            //todo corregir movimientos de fichas blancas
-            //todo corregir que una ficha no salte a otra excepto el caballo
-            //todo corregir que una ficha no se ponga encima de una ficha del mismo color
-            //todo corregir movimiento alfil negro
+            //todo corregir movimiento alfiles
+            //todo implementar ataque entre fichas - implementar borrar de img
+            //todo implementar turnos
+            //todo implementar movimientos especiales
+            //todo implementar que las cajas se iluminen para saber que movimientos se pueden hacer
+
             input.setIdPiece(selectedboxes.getPieceView().getId());
             input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
             input.setNewPosition(new Position(boxView.getX(), boxView.getY()));

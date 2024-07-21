@@ -151,6 +151,7 @@ public class Board {
         if ((output.getError() == null || output.getError().isEmpty()) && output.isCorrect()) {
             Position newPosition = input.getNewPosition();
             thePiece.get().setPosition(newPosition);
+            thePiece.get().setFistMovement(false);
         }
         return output;
     }

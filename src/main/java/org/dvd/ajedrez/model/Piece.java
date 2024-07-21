@@ -28,6 +28,9 @@ public class Piece {
         this.tipo = tipo;
         this.color = color;
         this.isDead = false;
+        if ("P".equals(tipo)) {
+            fistMovement = true;
+        }
     }
 
 
@@ -94,7 +97,7 @@ public class Piece {
     public List<Position> getMoves(List<Piece> pieceList) {
 
         LOGGER.info("Posición {}", position);
-         return switch (tipo) {
+        return switch (tipo) {
             case "T" ->//Torre
                     getTowerMoves(pieceList);
             case "H" ->//Caballo
@@ -106,7 +109,7 @@ public class Piece {
             case "K" ->//Rey
                     getKingMoves(pieceList);
             case "P" ->//Peon
-                    getPawnMoves();
+                    getPawnMoves(pieceList);
             default -> null;
         };
 
@@ -156,7 +159,7 @@ public class Piece {
                 }
                 break;
             case "P"://Peon
-                Optional<Position> pawnPosition = getPawnMoves().stream()
+                Optional<Position> pawnPosition = getPawnMoves(pieceList).stream()
                         .filter(position1 -> position1.equals(newPosition)).findAny();
                 if (pawnPosition.isPresent()) {
                     return true;
@@ -197,35 +200,57 @@ public class Piece {
         return salida.stream().filter(Position::isValid).toList();
     }
 
-    public List<Position> getPawnMoves() {
+    public List<Position> getPawnMoves(List<Piece> pieceList) {
         List<Position> positions = new LinkedList<>();
 
-        //Black
+
+        //Control de los movimientos cuando es ficha negra
         if (color.equals("B")) {
-            positions.add(new Position(position.getX(), position.getY() + 1));
-            if (attack) {
+
+            Optional<Piece> rightEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() + 1, position.getY() + 1)) && !piece.getColor().equals(color)).findAny();
+            Optional<Piece> leftEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() - 1, position.getY() + 1)) && !piece.getColor().equals(color)).findAny();
+            if (rightEnemy.isPresent()) {
                 positions.add(new Position(position.getX() + 1, position.getY() + 1));
+
+            }
+            if (leftEnemy.isPresent()) {
                 positions.add(new Position(position.getX() - 1, position.getY() + 1));
             }
             if (fistMovement) {
                 positions.add(new Position(position.getX(), position.getY() + 2));
+
+            }
+            Optional<Piece> pieceInFront = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX(), position.getY() + 1))).findAny();
+
+            if (pieceInFront.isEmpty()) {
+                positions.add(new Position(position.getX(), position.getY() + 1));
             }
         }
-        //White
+        //Control de los movimientos cuando es ficha blanca
         if (color.equals("W")) {
-            positions.add(new Position(position.getX(), position.getY() - 1));
-            if (attack) {
+             Optional<Piece> rightEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() + 1, position.getY() - 1)) && !piece.getColor().equals(color)).findAny();
+            Optional<Piece> leftEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() - 1, position.getY() - 1)) && !piece.getColor().equals(color)).findAny();
+
+            if (rightEnemy.isPresent()) {
                 positions.add(new Position(position.getX() + 1, position.getY() - 1));
+            }
+            if (leftEnemy.isPresent()) {
                 positions.add(new Position(position.getX() - 1, position.getY() - 1));
+
             }
             if (fistMovement) {
                 positions.add(new Position(position.getX(), position.getY() - 2));
 
             }
+            Optional<Piece> pieceInFront = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX(), position.getY() - 1))).findAny();
+
+            if (pieceInFront.isEmpty()) {
+                positions.add(new Position(position.getX(), position.getY() - 1));
+            }
 
         }
 
-        return positions.stream().filter(Position::isValid).toList();
+        return positions;
     }
 
     public List<Position> getBishopMoves(List<Piece> pieceList) {
@@ -249,12 +274,12 @@ public class Piece {
         }
 
 
-        List<Position> alliesPosition1 =  listPosition1.stream()
+        List<Position> alliesPosition1 = listPosition1.stream()
                 .filter(position1 -> pieceList.stream().filter(piece -> piece.getColor().equals(color))
                         .filter(piece -> piece.getPosition().getX() != position.getX() && piece.getPosition().getY() != position.getY())
                         .map(Piece::getPosition).anyMatch(position2 -> position2.equals(position1)))
                 .sorted(Comparator.comparingInt(position1 -> position1.getX() + position1.getY()))
-                .toList() ;
+                .toList();
 
 
         List<Position> alliesPosition2 = listPosition2.stream()
@@ -263,7 +288,7 @@ public class Piece {
                 .sorted(Comparator.comparingInt(position1 -> position1.getX() + position1.getY()))
                 .toList();
 
-        List<Position> salida  = new LinkedList<>();
+        List<Position> salida = new LinkedList<>();
         for (Position postAllies : alliesPosition1) {
 
             int xAllie = postAllies.getX() - position.getX();
@@ -274,7 +299,7 @@ public class Piece {
             }
 
         }
-        List<Position> salida2  = new LinkedList<>();
+        List<Position> salida2 = new LinkedList<>();
         for (Position postAllies : alliesPosition2) {
 
             int positionAllie = postAllies.getX() - position.getX() + postAllies.getY() - position.getY();
@@ -296,7 +321,7 @@ public class Piece {
     public List<Position> getQueenMoves(List<Piece> pieceList) {
         List<Position> towerMoves = getTowerMoves(pieceList);
         List<Position> bishopMoves = getBishopMoves(pieceList);
-        return Stream.concat(towerMoves.stream(),bishopMoves.stream()).toList();
+        return Stream.concat(towerMoves.stream(), bishopMoves.stream()).toList();
     }
 
     public List<Position> getTowerMoves(List<Piece> pieceList) {
