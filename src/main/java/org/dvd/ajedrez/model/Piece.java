@@ -204,47 +204,73 @@ public class Piece {
         List<Position> positions = new LinkedList<>();
 
 
+        Piece rightEnemy = null;
+        Piece leftEnemy = null;
+        Piece pieceInFront = null;
+        Piece pieceIn2Front = null;
+
         //Control de los movimientos cuando es ficha negra
         if (color.equals("B")) {
+            for (Piece piece : pieceList) {
 
-            Optional<Piece> rightEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() + 1, position.getY() + 1)) && !piece.getColor().equals(color)).findAny();
-            Optional<Piece> leftEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() - 1, position.getY() + 1)) && !piece.getColor().equals(color)).findAny();
-            if (rightEnemy.isPresent()) {
+                if (piece.getPosition().equals(new Position(position.getX() + 1, position.getY() + 1)) && !piece.getColor().equals(color)) {
+                    rightEnemy = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX() - 1, position.getY() + 1)) && !piece.getColor().equals(color)) {
+                    leftEnemy = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX(), position.getY() + 1))) {
+                    pieceInFront = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX(), position.getY() + 2))) {
+                    pieceIn2Front = piece;
+                }
+            }
+            if (rightEnemy != null) {
                 positions.add(new Position(position.getX() + 1, position.getY() + 1));
 
             }
-            if (leftEnemy.isPresent()) {
+            if (leftEnemy != null) {
                 positions.add(new Position(position.getX() - 1, position.getY() + 1));
             }
-            if (fistMovement) {
+
+            if (fistMovement && pieceIn2Front == null && pieceInFront == null) {
                 positions.add(new Position(position.getX(), position.getY() + 2));
 
             }
-            Optional<Piece> pieceInFront = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX(), position.getY() + 1))).findAny();
 
-            if (pieceInFront.isEmpty()) {
+            if (pieceInFront == null) {
                 positions.add(new Position(position.getX(), position.getY() + 1));
             }
         }
         //Control de los movimientos cuando es ficha blanca
         if (color.equals("W")) {
-            Optional<Piece> rightEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() + 1, position.getY() - 1)) && !piece.getColor().equals(color)).findAny();
-            Optional<Piece> leftEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() - 1, position.getY() - 1)) && !piece.getColor().equals(color)).findAny();
-
-            if (rightEnemy.isPresent()) {
+            for (Piece piece : pieceList) {
+                if (piece.getPosition().equals(new Position(position.getX() + 1, position.getY() - 1)) && !piece.getColor().equals(color)) {
+                    rightEnemy = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX() - 1, position.getY() - 1)) && !piece.getColor().equals(color)) {
+                    leftEnemy = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX(), position.getY() - 1))) {
+                    pieceInFront = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX(), position.getY() - 2))) {
+                    pieceIn2Front = piece;
+                }
+            }
+            if (rightEnemy != null) {
                 positions.add(new Position(position.getX() + 1, position.getY() - 1));
             }
-            if (leftEnemy.isPresent()) {
+            if (leftEnemy != null) {
                 positions.add(new Position(position.getX() - 1, position.getY() - 1));
 
             }
-            if (fistMovement) {
+            if (fistMovement && pieceIn2Front == null) {
                 positions.add(new Position(position.getX(), position.getY() - 2));
 
             }
-            Optional<Piece> pieceInFront = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX(), position.getY() - 1))).findAny();
-
-            if (pieceInFront.isEmpty()) {
+            if (pieceInFront == null) {
                 positions.add(new Position(position.getX(), position.getY() - 1));
             }
 
@@ -346,7 +372,11 @@ public class Piece {
                 }
 
             }
-            if (isAllie || numAttackEnemies > 1) {
+            if (isAllie) {
+                break;
+            }
+            if (numAttackEnemies >= 1) {
+                positions.add(new Position(x, position.getY()));
                 break;
             }
             positions.add(new Position(x, position.getY()));
@@ -364,7 +394,11 @@ public class Piece {
                 }
 
             }
-            if (isAllie || numAttackEnemies > 1) {
+            if (isAllie) {
+                break;
+            }
+            if (numAttackEnemies >= 1) {
+                positions.add(new Position(x, position.getY()));
                 break;
             }
             positions.add(new Position(x, position.getY()));
@@ -382,7 +416,11 @@ public class Piece {
                 }
 
             }
-            if (isAllie || numAttackEnemies > 1) {
+            if (isAllie) {
+                break;
+            }
+            if (numAttackEnemies >= 1) {
+                positions.add(new Position(position.getX(), y));
                 break;
             }
             positions.add(new Position(position.getX(), y));
@@ -400,7 +438,11 @@ public class Piece {
                 }
 
             }
-            if (isAllie || numAttackEnemies > 1) {
+            if (isAllie) {
+                break;
+            }
+            if (numAttackEnemies >= 1) {
+                positions.add(new Position(position.getX(), y));
                 break;
             }
             positions.add(new Position(position.getX(), y));
@@ -419,21 +461,19 @@ public class Piece {
         positions.add(new Position(position.getX() - 1, position.getY() - 2));
         positions.add(new Position(position.getX() - 2, position.getY() + 1));
         positions.add(new Position(position.getX() - 2, position.getY() - 1));
-
+        List<Position> out = new ArrayList<>(positions.stream().toList());
         for (Position position1 : positions) {
-            boolean isAllie = false;
+
             for (Piece piece : pieceList) {
                 if (piece.getColor().equals(color) && piece.getPosition().equals(position1)) {
-                    isAllie = true;
-                    positions.remove(position1);
+
+                    out.remove(position1);
                     break;
                 }
             }
-            if (isAllie) {
-                break;
-            }
+
         }
-        return positions.stream().filter(Position::isValid)
+        return out.stream().filter(Position::isValid)
                 .toList();
 
     }

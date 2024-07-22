@@ -219,14 +219,18 @@ public class BoardView {
         }
         //Si hemos seleccionado la segunda casilla comprobamos que podemos mover
         if (selectedboxes != null) {
+            //quitamos el color a la casilla seleccionada
+            Color originalColor = new Color(0.13, 1.0, 0.246, 0);
+            searchMovesAndPaint(originalColor);
+            //Restablecemos color de la posicion a donde se mueve
+            boxViews[boxView.getX()][boxView.getY()].getBoxSelected().setFill(originalColor);
 
-            Input input = new Input();
             //todo corregir movimiento alfiles
             //todo implementar ataque entre fichas - implementar borrar de img
             //todo implementar turnos
             //todo implementar movimientos especiales
-            //todo implementar que las cajas se iluminen para saber que movimientos se pueden hacer
 
+            Input input = new Input();
             input.setIdPiece(selectedboxes.getPieceView().getId());
             input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
             input.setNewPosition(new Position(boxView.getX(), boxView.getY()));
@@ -246,17 +250,11 @@ public class BoardView {
                     boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
                     boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
 
-                    //quitamos el color a la casilla seleccionada
-                    Color originalColor = new Color(0.13, 1.0, 0.246, 0);
-
-                    searchMovesAndPaint(originalColor);
-                    //Restablecemos color de la posicion a donde se mueve
-                    boxViews[boxView.getX()][boxView.getY()].getBoxSelected().setFill(originalColor);
-                    //Quitamos selección
                     selectedboxes.setPieceView(null);
-                    selectedboxes = null;
                 }
             }
+            //Quitamos selección
+            selectedboxes = null;
         } else {
             Color newColor = new Color(0.13, 1.0, 0.246, 0.2132);
             selectedboxes = boxView;
