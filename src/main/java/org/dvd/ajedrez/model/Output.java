@@ -1,5 +1,7 @@
 package org.dvd.ajedrez.model;
 
+import java.util.List;
+
 public class Output {
     private boolean isCorrect; // variable que indica que es correcto el movimeinto
     private int idPiece; // Se devuelve la ficha movida
@@ -13,6 +15,7 @@ public class Output {
 
     private boolean draw; // indicador si hay tablas
     private String information; // información de salida
+    private List<Position> posiblesMoves; // posibles movimientos de la ficha
 
     public void restart(int idPiece, String color) {
         this.idPiece = idPiece;
@@ -23,6 +26,14 @@ public class Output {
         checkKing = false;
         error = null;
         isCorrect = true;
+    }
+
+    public List<Position> getPosiblesMoves() {
+        return posiblesMoves;
+    }
+
+    public void setPosiblesMoves(List<Position> posiblesMoves) {
+        this.posiblesMoves = posiblesMoves;
     }
 
     public boolean isCorrect() {

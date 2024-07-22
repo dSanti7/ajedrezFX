@@ -228,7 +228,7 @@ public class Piece {
         }
         //Control de los movimientos cuando es ficha blanca
         if (color.equals("W")) {
-             Optional<Piece> rightEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() + 1, position.getY() - 1)) && !piece.getColor().equals(color)).findAny();
+            Optional<Piece> rightEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() + 1, position.getY() - 1)) && !piece.getColor().equals(color)).findAny();
             Optional<Piece> leftEnemy = pieceList.stream().filter(piece -> piece.getPosition().equals(new Position(position.getX() - 1, position.getY() - 1)) && !piece.getColor().equals(color)).findAny();
 
             if (rightEnemy.isPresent()) {
@@ -309,6 +309,12 @@ public class Piece {
                 salida2 = alliesPosition2.stream().filter(position1 -> positionAllie > position1.getX() - position.getX() + position1.getY() - position.getY()).toList();
             }
 
+        }
+        if (alliesPosition2.isEmpty()) {
+            salida2 = listPosition2;
+        }
+        if (alliesPosition1.isEmpty()) {
+            salida = listPosition1;
         }
 
 

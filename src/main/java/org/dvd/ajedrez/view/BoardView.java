@@ -4,7 +4,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.dvd.ajedrez.model.Board;
@@ -164,7 +163,7 @@ public class BoardView {
                 boxView.setBoxSelected(selectedBox);
                 boxView.setX(x);
                 boxView.setY(y);
-                selectedBox.setOnMouseClicked(event -> handleRectangleClick(event, boxView));
+                selectedBox.setOnMouseClicked(event -> handleRectangleClick(boxView));
                 groupBoard.getChildren().add(boxChess);
                 groupBoard.getChildren().add(boxView.getBoxSelected());
 
@@ -197,7 +196,7 @@ public class BoardView {
         return rectangle;
     }
 
-    private void handleRectangleClick(MouseEvent event, BoxView boxView) {
+    private void handleRectangleClick(BoxView boxView) {
 
 
         //desseleccionamos casilla
@@ -205,9 +204,9 @@ public class BoardView {
             LOGGER.info("handleRectangleClick - boxView x:" + boxView.getX() + " y:" + boxView.getY() + " - selectedboxes x:" + selectedboxes.getX() + " y:" + selectedboxes.getY());
             LOGGER.info("handleRectangleClick - id boxView: " + boxView.getPieceView().getId() + " selectedboxes:" + selectedboxes.getPieceView().getId());
             //quitamos el color a la casilla seleccionada
-            Color paint = new Color(0.13, 1.0, 0.246, 0);
-            selectedboxes.getBoxSelected().setFill(paint);
+            Color newColor = new Color(0.13, 1.0, 0.246, 0);
 
+            searchMovesAndPaint(newColor);
             //Quitamos selección
             selectedboxes = null;
             return;
@@ -232,36 +231,59 @@ public class BoardView {
             input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
             input.setNewPosition(new Position(boxView.getX(), boxView.getY()));
             Output output = board.updatePiece(input);
-            LOGGER.info("handleRectangleClick - Resultado {}",output.toString());
+            LOGGER.info("handleRectangleClick - Resultado {}", output.toString());
             if (output.getError() == null || output.getError().isEmpty()) {
 
-                boxView.setPieceView(selectedboxes.getPieceView());
-                selectedboxes.setPieceView(null);
-                int widthPiece = 18;
-                int heightPiece = 30;
-                double size = boxView.getBoxSelected().getHeight();
-                double paddingWidth = (size - widthPiece) / 2;
-                double paddingHeight = (size - heightPiece) / 2;
+                if (output.isCorrect()) {
+                    boxView.setPieceView(selectedboxes.getPieceView());
 
-                boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
-                boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
+                    int widthPiece = 18;
+                    int heightPiece = 30;
+                    double size = boxView.getBoxSelected().getHeight();
+                    double paddingWidth = (size - widthPiece) / 2;
+                    double paddingHeight = (size - heightPiece) / 2;
+                    //mover ficha
+                    boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
+                    boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
 
+                    //quitamos el color a la casilla seleccionada
+                    Color originalColor = new Color(0.13, 1.0, 0.246, 0);
 
-                //mover ficha
-
-                //quitamos el color a la casilla seleccionada
-                Color paint = new Color(0.13, 1.0, 0.246, 0);
-                selectedboxes.getBoxSelected().setFill(paint);
-
-                //Quitamos selección
-                selectedboxes = null;
+                    searchMovesAndPaint(originalColor);
+                    //Restablecemos color de la posicion a donde se mueve
+                    boxViews[boxView.getX()][boxView.getY()].getBoxSelected().setFill(originalColor);
+                    //Quitamos selección
+                    selectedboxes.setPieceView(null);
+                    selectedboxes = null;
+                }
             }
         } else {
-            Color paint = new Color(0.13, 1.0, 0.246, 0.2132);
-            boxView.getBoxSelected().setFill(paint);
+            Color newColor = new Color(0.13, 1.0, 0.246, 0.2132);
             selectedboxes = boxView;
+            searchMovesAndPaint(newColor);
         }
 
+    }
+
+    private void searchMovesAndPaint(Color color) {
+        selectedboxes.getBoxSelected().setFill(color);
+        Input input = new Input();
+        input.setIdPiece(selectedboxes.getPieceView().getId());
+        input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
+        Output output = board.getMoves(input);
+        if (output.getPosiblesMoves() != null
+                && !output.getPosiblesMoves().isEmpty()) {
+            for (int x = 0; x < 8; x++) {
+                for (int y = 0; y < 8; y++) {
+                    Position auxPosition = new Position(x, y);
+                    if (output.getPosiblesMoves().stream().anyMatch(position -> position.equals(auxPosition))) {
+                        boxViews[x][y].getBoxSelected().setFill(color);
+                        LOGGER.info("Pintamos - x {} y {}", x, y);
+                    }
+                }
+            }
+
+        }
     }
 
     public void changeSizeTablero(Rectangle imgBoard) {

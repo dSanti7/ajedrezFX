@@ -73,8 +73,36 @@ public class Board {
 
     }
 
+    public Output getMoves(Input input) {
+        LOGGER.info("getMoves - Entrada : {}", input);
+        int id = input.getIdPiece();
+        Output output = new Output();
+        output.setIdPiece(id);
+        output.setCorrect(true);
+        Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
+        if (thePiece.isEmpty()) {
+            output.setError("getMoves - No se encontró la ficha indicada");
+            return output;
+        }
+        //Creamos ficha auxiliar para hacer la busqueda de los movimientos
+        Piece piece = new Piece();
+        piece.setFistMovement(thePiece.get().isFistMovement());
+        piece.setPosition(input.getActualPosition());
+        piece.setTipo(thePiece.get().getTipo());
+        piece.setColor(thePiece.get().getColor());
+        List<Position> moves = piece.getMoves(pieceList);
+
+        LOGGER.info("getMoves - MOVIMIENTOS DE PIEZA - {}", moves);
+
+
+        output.setPosiblesMoves(moves);
+        output.setInformation("getMoves - Devolvemos los posibles movimientos");
+
+        return output;
+    }
+
     public Output updatePiece(Input input) {
-        LOGGER.info("updatePiece - Entrada : {}",input);
+        LOGGER.info("updatePiece - Entrada : {}", input);
         int id = input.getIdPiece();
 
         Output output = new Output();
@@ -86,11 +114,17 @@ public class Board {
             output.setError("No se encontró la ficha indicada");
             return output;
         }
-        //comprobamos si es un movimiento valido
+
         List<Position> theMoves = thePiece.get().getMoves(pieceList);
 
         LOGGER.info("MOVIMIENTOS DE PIEZA - {}", theMoves);
 
+        if (input.getNewPosition() == null) {
+            output.setPosiblesMoves(theMoves);
+            output.setInformation("Devolvemos los posibles movimientos");
+            return output;
+        }
+        //comprobamos si es un movimiento valido
         if (theMoves.stream().noneMatch(position -> position.equals(input.getNewPosition()))) {
             output.setCorrect(false);
             output.setError("La posición no es posible");
@@ -103,13 +137,13 @@ public class Board {
 
         //comprobamos si mata a alguna ficha
         List<Piece> pieces = pieceList.stream().filter(piece -> theMoves.stream().anyMatch(position -> piece.getPosition().equals(position))).toList();
-        Optional<Piece> enemy = pieces.stream().filter(piece -> piece.getPosition().equals(input.getNewPosition())  && !piece.getColor().equals(theColor)).findAny();
+        Optional<Piece> enemy = pieces.stream().filter(piece -> piece.getPosition().equals(input.getNewPosition()) && !piece.getColor().equals(theColor)).findAny();
 
         //Si hay enemigo y es un movimiento valido
         enemy.ifPresent(piece -> {
-                //Matamos a una ficha
-                piece.setDead(true);
-                output.setIdPieceDeleted(piece.getId());
+            //Matamos a una ficha
+            piece.setDead(true);
+            output.setIdPieceDeleted(piece.getId());
 
         });
 
