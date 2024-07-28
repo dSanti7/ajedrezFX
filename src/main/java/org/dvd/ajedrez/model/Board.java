@@ -90,7 +90,8 @@ public class Board {
         piece.setPosition(input.getActualPosition());
         piece.setTipo(thePiece.get().getTipo());
         piece.setColor(thePiece.get().getColor());
-        List<Position> moves = piece.getMoves(pieceList);
+
+        List<Position> moves = piece.getMoves(pieceList.stream().filter(p -> !p.isDead()).toList());
 
         LOGGER.info("getMoves - MOVIMIENTOS DE PIEZA - {}", moves);
 
@@ -115,15 +116,10 @@ public class Board {
             return output;
         }
 
-        List<Position> theMoves = thePiece.get().getMoves(pieceList);
+        List<Position> theMoves = thePiece.get().getMoves(pieceList.stream().filter(piece -> !piece.isDead()).toList());
 
         LOGGER.info("MOVIMIENTOS DE PIEZA - {}", theMoves);
 
-        if (input.getNewPosition() == null) {
-            output.setPosiblesMoves(theMoves);
-            output.setInformation("Devolvemos los posibles movimientos");
-            return output;
-        }
         //comprobamos si es un movimiento valido
         if (theMoves.stream().noneMatch(position -> position.equals(input.getNewPosition()))) {
             output.setCorrect(false);
@@ -136,7 +132,10 @@ public class Board {
         output.setIdPiece(thePiece.get().getId());
 
         //comprobamos si mata a alguna ficha
-        List<Piece> pieces = pieceList.stream().filter(piece -> theMoves.stream().anyMatch(position -> piece.getPosition().equals(position))).toList();
+        List<Piece> pieces = pieceList.stream()
+                .filter(piece -> theMoves.stream().anyMatch(position -> piece.getPosition().equals(position)))
+                .filter(piece -> !piece.isDead())
+                .toList();
         Optional<Piece> enemy = pieces.stream().filter(piece -> piece.getPosition().equals(input.getNewPosition()) && !piece.getColor().equals(theColor)).findAny();
 
         //Si hay enemigo y es un movimiento valido
@@ -153,11 +152,11 @@ public class Board {
                         && piece.getTipo().equals("K")).findAny().get();
 
 
-        Optional<Piece> pieceStream = pieceList.stream()
+        Optional<Piece> enemyCanKillKing = pieceList.stream()
                 .filter(piece -> !theColor.equals(piece.getColor()))
                 .filter(piece -> piece.canPieceMove(enemyKing.getPosition(), pieceList)).findAny();
 
-        pieceStream.ifPresent(piece -> {
+        enemyCanKillKing.ifPresent(piece -> {
             output.setCheckKing(true);
             String info = output.getInformation();
             output.setInformation(info + " " + piece);

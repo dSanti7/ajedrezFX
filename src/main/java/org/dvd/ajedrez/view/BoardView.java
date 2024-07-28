@@ -229,6 +229,7 @@ public class BoardView {
             //todo implementar ataque entre fichas - implementar borrar de img
             //todo implementar turnos
             //todo implementar movimientos especiales
+            //todo revisar movimientos de fichas. Ya está el peón y torre y caballo
 
             Input input = new Input();
             input.setIdPiece(selectedboxes.getPieceView().getId());
@@ -239,6 +240,10 @@ public class BoardView {
             if (output.getError() == null || output.getError().isEmpty()) {
 
                 if (output.isCorrect()) {
+                    if (output.getIdPieceDeleted() > 0) {
+                        boxView.getPieceView().getImageView().setImage(null);
+                        //todo revisar funcionamiento de borrado de imagen
+                    }
                     boxView.setPieceView(selectedboxes.getPieceView());
 
                     int widthPiece = 18;
@@ -246,12 +251,16 @@ public class BoardView {
                     double size = boxView.getBoxSelected().getHeight();
                     double paddingWidth = (size - widthPiece) / 2;
                     double paddingHeight = (size - heightPiece) / 2;
+
                     //mover ficha
                     boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
                     boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
 
+
+
                     selectedboxes.setPieceView(null);
                 }
+
             }
             //Quitamos selección
             selectedboxes = null;

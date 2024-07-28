@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -285,69 +284,149 @@ public class Piece {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (Math.abs(i - position.getX()) ==
-                        Math.abs(j - position.getY())
-                        && i != position.getX() && j != position.getY()) {
+                        Math.abs(j - position.getY())) {
 
                     if (i - position.getX() + j - position.getY() == 0) {
-                        //izq abajo  - arriba derecha
-                        listPosition1.add(new Position(i, j));
+                        if (new Position(i, j).equals(position)) {
+                            listPosition1.add(new Position(i, j));
+                            listPosition2.add(new Position(i, j));
+                        } else {
+                            //izq abajo  - arriba derecha
+                            listPosition1.add(new Position(i, j));
+                        }
                     } else {
+
                         //izq arriba - abajo derecha
                         listPosition2.add(new Position(i, j));
+
                     }
+
                 }
             }
         }
 
-
-        List<Position> alliesPosition1 = listPosition1.stream()
-                .filter(position1 -> pieceList.stream().filter(piece -> piece.getColor().equals(color))
-                        .filter(piece -> piece.getPosition().getX() != position.getX() && piece.getPosition().getY() != position.getY())
-                        .map(Piece::getPosition).anyMatch(position2 -> position2.equals(position1)))
-                .sorted(Comparator.comparingInt(position1 -> position1.getX() + position1.getY()))
+        //obtenemos los aliados de la lista 1
+        List<Piece> allies = pieceList.stream()
+                .filter(piece -> piece.getColor().equals(color))
+                .filter(piece -> !piece.getPosition().equals(position))
                 .toList();
 
+        List<Position> positionsAllies = getPositionsAllies(listPosition1, allies);
+        List<Position> positionsAllies2 = getPositionsAllies(listPosition2, allies);
 
-        List<Position> alliesPosition2 = listPosition2.stream()
-                .filter(position1 -> pieceList.stream().filter(piece -> piece.getColor().equals(color))
-                        .map(Piece::getPosition).anyMatch(position2 -> position2.equals(position1)))
-                .sorted(Comparator.comparingInt(position1 -> position1.getX() + position1.getY()))
+        List<Position> salida   = concatenarList(positionsAllies, positionsAllies2);
+
+        //actualizamos los datos posibles
+        listPosition1 = getPositionsPosibles(listPosition1, salida);
+        listPosition2 = getPositionsPosibles(listPosition2, salida);
+
+        //Buscamos los enemigos del tablero
+        List<Piece> enemies = pieceList.stream()
+                .filter(piece -> !piece.getColor().equals(color))
                 .toList();
 
+        //obtenemos las posiciones posibles teniendo en cuenta los enemigos
+        List<Position> positionsEnemies = getPositionsEnemies(listPosition1, enemies);
+        List<Position> positionsEnemies2 = getPositionsEnemies(listPosition2, enemies);
+
+        return concatenarList(positionsEnemies, positionsEnemies2);
+    }
+
+    private static List<Position> concatenarList(List<Position> positionsAllies, List<Position> positionsAllies2) {
+        List<Position> concatenatedList = new ArrayList<>();
+        for (Position item : positionsAllies) {
+            concatenatedList.add(item);
+        }
+        for (Position item : positionsAllies2) {
+            concatenatedList.add(item);
+        }
+        return concatenatedList;
+    }
+
+    private static List<Position> getPositionsPosibles(List<Position> listPosition1, List<Position> finalSalida) {
+        listPosition1 = listPosition1.stream()
+                .filter(position1 -> finalSalida.stream()
+                        .anyMatch(position2 -> position2.equals(position1)))
+                .toList();
+        return listPosition1;
+    }
+
+    private List<Position> getPositionsEnemies(List<Position> listPosition1, List<Piece> enemies) {
         List<Position> salida = new LinkedList<>();
-        for (Position postAllies : alliesPosition1) {
 
-            int xAllie = postAllies.getX() - position.getX();
-            if (xAllie < 0) {
-                salida = listPosition1.stream().filter(position1 -> xAllie < position1.getX() - position.getX()).toList();
+        boolean medio = false;
+        int numEnemies = 0;
+
+        for (Position position : listPosition1) {
+            if (medio) {
+                if (enemies.stream().map(Piece::getPosition).noneMatch(position1 -> position1.equals(position))) {
+                    //si no hay enemigo
+                    if (numEnemies == 0) {
+                        salida.add(position);
+                    }
+                } else {
+                    // si encuentra un enemigo. Terminamos de buscar y lo añade
+                    if (numEnemies == 0) {
+                        salida.add(position);
+                        numEnemies++;
+                    }
+                    break;
+                }
             } else {
-                salida = listPosition1.stream().filter(position1 -> xAllie > position1.getX() - position.getX()).toList();
+                //izq hasta el centro
+                if (enemies.stream().map(Piece::getPosition).noneMatch(position1 -> position1.equals(position))) {
+                    //si no hay enemigo
+                    salida.add(position);
+                } else {
+                    salida = new LinkedList<>();
+                    salida.add(position);
+                    numEnemies++;
+
+
+                }
             }
-
+            if (position.equals(this.position)) {
+                medio = true;
+                numEnemies= 0;
+            }
         }
-        List<Position> salida2 = new LinkedList<>();
-        for (Position postAllies : alliesPosition2) {
+        return salida;
+    }
 
-            int positionAllie = postAllies.getX() - position.getX() + postAllies.getY() - position.getY();
-            if (positionAllie < 0) {
-                salida2 = alliesPosition2.stream().filter(position1 -> positionAllie < position1.getX() - position.getX() + position1.getY() - position.getY()).toList();
+    private List<Position> getPositionsAllies(List<Position> listPosition, List<Piece> allies ) {
+        boolean medio = false;
+        boolean isAlie = false;
+        List<Position> salida = new LinkedList<>();
+
+        //buscamos las posiciones validas sin incluir los aliados
+        for (Position position : listPosition) {
+            if (medio) {
+                if (allies.stream().map(Piece::getPosition).noneMatch(position1 -> position1.equals(position))) {
+                    //si no hay aliados
+                    if (!isAlie) {
+                        salida.add(position);
+                    }
+                } else {
+                    isAlie = true;
+                    // si encuentra un aliado. Terminamos de buscar
+                    break;
+                }
             } else {
-                salida2 = alliesPosition2.stream().filter(position1 -> positionAllie > position1.getX() - position.getX() + position1.getY() - position.getY()).toList();
+                //izq hasta el centro
+                if (allies.stream().map(Piece::getPosition).noneMatch(position1 -> position1.equals(position))) {
+                    //si no hay aliados
+                    salida.add(position);
+                } else {
+                    //si hay aliado
+                    salida = new LinkedList<>();
+
+                }
             }
-
+            if (position.equals(this.position)) {
+                medio = true;
+            }
         }
-        if (alliesPosition2.isEmpty()) {
-            salida2 = listPosition2;
-        }
-        if (alliesPosition1.isEmpty()) {
-            salida = listPosition1;
-        }
-
-
-        //Todo filtro de casillas cuando hay enemigos.
-
-
-        return Stream.concat(salida.stream(), salida2.stream()).filter(Position::isValid).toList();
+        return salida;
     }
 
     public List<Position> getQueenMoves(List<Piece> pieceList) {
