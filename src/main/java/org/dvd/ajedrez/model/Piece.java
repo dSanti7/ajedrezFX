@@ -108,7 +108,7 @@ public class Piece {
             case "K" ->//Rey
                     getKingMoves(pieceList);
             case "P" ->//Peon
-                    getPawnMoves(pieceList);
+                    getPawnAll(pieceList);
             default -> null;
         };
 
@@ -158,7 +158,7 @@ public class Piece {
                 }
                 break;
             case "P"://Peon
-                Optional<Position> pawnPosition = getPawnMoves(pieceList).stream()
+                Optional<Position> pawnPosition = getPawnMovesAtack().stream()
                         .filter(position1 -> position1.equals(newPosition)).findAny();
                 if (pawnPosition.isPresent()) {
                     return true;
@@ -199,15 +199,31 @@ public class Piece {
         return salida.stream().filter(Position::isValid).toList();
     }
 
-    public List<Position> getPawnMoves(List<Piece> pieceList) {
+    public List<Position> getPawnMovesAtack() {
+        List<Position> positions = new LinkedList<>();
+
+        if (color.equals("B")) {
+            positions.add(new Position(position.getX() + 1, position.getY() + 1));
+            positions.add(new Position(position.getX() - 1, position.getY() + 1));
+
+        }
+
+        //Control de los movimientos cuando es ficha blanca
+        if (color.equals("W")) {
+            positions.add(new Position(position.getX() + 1, position.getY() - 1));
+
+            positions.add(new Position(position.getX() - 1, position.getY() - 1));
+        }
+        return positions;
+
+    }
+
+    public List<Position> getPawnMovesAtack(List<Piece> pieceList) {
         List<Position> positions = new LinkedList<>();
 
 
         Piece rightEnemy = null;
         Piece leftEnemy = null;
-        Piece pieceInFront = null;
-        Piece pieceIn2Front = null;
-
         //Control de los movimientos cuando es ficha negra
         if (color.equals("B")) {
             for (Piece piece : pieceList) {
@@ -218,12 +234,7 @@ public class Piece {
                 if (piece.getPosition().equals(new Position(position.getX() - 1, position.getY() + 1)) && !piece.getColor().equals(color)) {
                     leftEnemy = piece;
                 }
-                if (piece.getPosition().equals(new Position(position.getX(), position.getY() + 1))) {
-                    pieceInFront = piece;
-                }
-                if (piece.getPosition().equals(new Position(position.getX(), position.getY() + 2))) {
-                    pieceIn2Front = piece;
-                }
+
             }
             if (rightEnemy != null) {
                 positions.add(new Position(position.getX() + 1, position.getY() + 1));
@@ -231,6 +242,50 @@ public class Piece {
             }
             if (leftEnemy != null) {
                 positions.add(new Position(position.getX() - 1, position.getY() + 1));
+            }
+
+        }
+        //Control de los movimientos cuando es ficha blanca
+        if (color.equals("W")) {
+            for (Piece piece : pieceList) {
+                if (piece.getPosition().equals(new Position(position.getX() + 1, position.getY() - 1)) && !piece.getColor().equals(color)) {
+                    rightEnemy = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX() - 1, position.getY() - 1)) && !piece.getColor().equals(color)) {
+                    leftEnemy = piece;
+                }
+            }
+            if (rightEnemy != null) {
+                positions.add(new Position(position.getX() + 1, position.getY() - 1));
+            }
+            if (leftEnemy != null) {
+                positions.add(new Position(position.getX() - 1, position.getY() - 1));
+
+            }
+
+
+        }
+
+        return positions;
+    }
+
+    public List<Position> getPawnMoves(List<Piece> pieceList) {
+        List<Position> positions = new LinkedList<>();
+
+        Piece pieceInFront = null;
+        Piece pieceIn2Front = null;
+
+        //Control de los movimientos cuando es ficha negra
+        if (color.equals("B")) {
+            for (Piece piece : pieceList) {
+
+
+                if (piece.getPosition().equals(new Position(position.getX(), position.getY() + 1))) {
+                    pieceInFront = piece;
+                }
+                if (piece.getPosition().equals(new Position(position.getX(), position.getY() + 2))) {
+                    pieceIn2Front = piece;
+                }
             }
 
             if (fistMovement && pieceIn2Front == null && pieceInFront == null) {
@@ -245,12 +300,7 @@ public class Piece {
         //Control de los movimientos cuando es ficha blanca
         if (color.equals("W")) {
             for (Piece piece : pieceList) {
-                if (piece.getPosition().equals(new Position(position.getX() + 1, position.getY() - 1)) && !piece.getColor().equals(color)) {
-                    rightEnemy = piece;
-                }
-                if (piece.getPosition().equals(new Position(position.getX() - 1, position.getY() - 1)) && !piece.getColor().equals(color)) {
-                    leftEnemy = piece;
-                }
+
                 if (piece.getPosition().equals(new Position(position.getX(), position.getY() - 1))) {
                     pieceInFront = piece;
                 }
@@ -258,13 +308,7 @@ public class Piece {
                     pieceIn2Front = piece;
                 }
             }
-            if (rightEnemy != null) {
-                positions.add(new Position(position.getX() + 1, position.getY() - 1));
-            }
-            if (leftEnemy != null) {
-                positions.add(new Position(position.getX() - 1, position.getY() - 1));
 
-            }
             if (fistMovement && pieceIn2Front == null) {
                 positions.add(new Position(position.getX(), position.getY() - 2));
 
@@ -276,6 +320,12 @@ public class Piece {
         }
 
         return positions;
+    }
+
+    public List<Position> getPawnAll(List<Piece> pieceList) {
+
+        return concatenarList(getPawnMoves(pieceList), getPawnMovesAtack(pieceList)
+        );
     }
 
     public List<Position> getBishopMoves(List<Piece> pieceList) {
@@ -314,7 +364,7 @@ public class Piece {
         List<Position> positionsAllies = getPositionsAllies(listPosition1, allies);
         List<Position> positionsAllies2 = getPositionsAllies(listPosition2, allies);
 
-        List<Position> salida   = concatenarList(positionsAllies, positionsAllies2);
+        List<Position> salida = concatenarList(positionsAllies, positionsAllies2);
 
         //actualizamos los datos posibles
         listPosition1 = getPositionsPosibles(listPosition1, salida);
@@ -387,13 +437,13 @@ public class Piece {
             }
             if (position.equals(this.position)) {
                 medio = true;
-                numEnemies= 0;
+                numEnemies = 0;
             }
         }
         return salida;
     }
 
-    private List<Position> getPositionsAllies(List<Position> listPosition, List<Piece> allies ) {
+    private List<Position> getPositionsAllies(List<Position> listPosition, List<Piece> allies) {
         boolean medio = false;
         boolean isAlie = false;
         List<Position> salida = new LinkedList<>();

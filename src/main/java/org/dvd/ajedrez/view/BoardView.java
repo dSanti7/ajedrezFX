@@ -225,7 +225,6 @@ public class BoardView {
             //Restablecemos color de la posicion a donde se mueve
             boxViews[boxView.getX()][boxView.getY()].getBoxSelected().setFill(originalColor);
 
-            //todo implementar turnos
             //todo implementar condicion para ganar
             //todo implementar movimientos especiales
 
@@ -235,27 +234,26 @@ public class BoardView {
             input.setNewPosition(new Position(boxView.getX(), boxView.getY()));
             Output output = board.updatePiece(input);
             LOGGER.info("handleRectangleClick - Resultado {}", output.toString());
-            if (output.isCorrect() && output.getError() == null || output.getError().isEmpty()) {
+            if (output.isCorrect() ) {
 
-                if (output.isCorrect()) {
-                    if (output.getIdPieceDeleted() > 0) {
-                        boxView.getPieceView().getImageView().setImage(null);
-                    }
-                    boxView.setPieceView(selectedboxes.getPieceView());
-
-                    int widthPiece = 18;
-                    int heightPiece = 30;
-                    double size = boxView.getBoxSelected().getHeight();
-                    double paddingWidth = (size - widthPiece) / 2;
-                    double paddingHeight = (size - heightPiece) / 2;
-
-                    //mover ficha
-                    boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
-                    boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
-
-
-                    selectedboxes.setPieceView(null);
+                if (output.getIdPieceDeleted() > 0) {
+                    boxView.getPieceView().getImageView().setImage(null);
                 }
+                boxView.setPieceView(selectedboxes.getPieceView());
+
+                int widthPiece = 18;
+                int heightPiece = 30;
+                double size = boxView.getBoxSelected().getHeight();
+                double paddingWidth = (size - widthPiece) / 2;
+                double paddingHeight = (size - heightPiece) / 2;
+
+                //mover ficha
+                boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
+                boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
+
+
+                selectedboxes.setPieceView(null);
+
 
             }
             //Quitamos selección

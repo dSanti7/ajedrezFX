@@ -82,6 +82,7 @@ public class Board {
         if (thePiece.isEmpty()) {
             Output output = new Output();
             output.setError("getMoves - No se encontró la ficha indicada");
+            output.setCorrect(false);
             return output;
         }
         Output output = new Output();
@@ -122,6 +123,7 @@ public class Board {
         output.setIdPiece(id);
         if (thePiece.isEmpty()) {
             output.setError("No se encontró la ficha indicada");
+            output.setCorrect(false);
             return output;
         }
         if(!thePiece.get().getColor().equals(colorTurno)) {
@@ -196,6 +198,18 @@ public class Board {
                         }
                 );
 
+        //Comprobamos la posición nueva de nuestro rey genera jacque y si si, de vuelva error
+        //porque no puedes mover tu rey a una posición peligrosa.
+        if(ourKing.getId() == input.getIdPiece()){
+             enemyCanKillKing = pieceList.stream()
+                    .filter(piece -> !theColor.equals(piece.getColor()))
+                    .filter(piece -> piece.canPieceMove(input.getNewPosition(), pieceList)).findAny();
+
+            enemyCanKillKing.ifPresent(piece -> {
+                output.setCorrect(false);
+                output.setError("Movimiento invalido. El rey en peligro");
+            });
+        }
 
         //Actualizamos estado de la ficha
         if ((output.getError() == null || output.getError().isEmpty()) && output.isCorrect()) {
