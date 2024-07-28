@@ -225,11 +225,9 @@ public class BoardView {
             //Restablecemos color de la posicion a donde se mueve
             boxViews[boxView.getX()][boxView.getY()].getBoxSelected().setFill(originalColor);
 
-            //todo corregir movimiento alfiles
-            //todo implementar ataque entre fichas - implementar borrar de img
             //todo implementar turnos
+            //todo implementar condicion para ganar
             //todo implementar movimientos especiales
-            //todo revisar movimientos de fichas. Ya está el peón y torre y caballo
 
             Input input = new Input();
             input.setIdPiece(selectedboxes.getPieceView().getId());
@@ -237,12 +235,11 @@ public class BoardView {
             input.setNewPosition(new Position(boxView.getX(), boxView.getY()));
             Output output = board.updatePiece(input);
             LOGGER.info("handleRectangleClick - Resultado {}", output.toString());
-            if (output.getError() == null || output.getError().isEmpty()) {
+            if (output.isCorrect() && output.getError() == null || output.getError().isEmpty()) {
 
                 if (output.isCorrect()) {
                     if (output.getIdPieceDeleted() > 0) {
                         boxView.getPieceView().getImageView().setImage(null);
-                        //todo revisar funcionamiento de borrado de imagen
                     }
                     boxView.setPieceView(selectedboxes.getPieceView());
 
@@ -255,7 +252,6 @@ public class BoardView {
                     //mover ficha
                     boxView.getPieceView().getImageView().setX(paddingWidth + boxView.getBoxSelected().getX());
                     boxView.getPieceView().getImageView().setY(paddingHeight + boxView.getBoxSelected().getY());
-
 
 
                     selectedboxes.setPieceView(null);
@@ -278,7 +274,7 @@ public class BoardView {
         input.setIdPiece(selectedboxes.getPieceView().getId());
         input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
         Output output = board.getMoves(input);
-        if (output.getPosiblesMoves() != null
+        if (output.isCorrect() && output.getPosiblesMoves() != null
                 && !output.getPosiblesMoves().isEmpty()) {
             for (int x = 0; x < 8; x++) {
                 for (int y = 0; y < 8; y++) {

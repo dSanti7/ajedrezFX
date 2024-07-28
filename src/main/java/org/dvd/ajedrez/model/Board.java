@@ -13,6 +13,7 @@ public class Board {
 
     private static Board board;
     private static List<Piece> pieceList;
+    private String colorTurno = "W";
 
 
     public static Board start() {
@@ -75,15 +76,25 @@ public class Board {
 
     public Output getMoves(Input input) {
         LOGGER.info("getMoves - Entrada : {}", input);
+
         int id = input.getIdPiece();
-        Output output = new Output();
-        output.setIdPiece(id);
-        output.setCorrect(true);
         Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
         if (thePiece.isEmpty()) {
+            Output output = new Output();
             output.setError("getMoves - No se encontró la ficha indicada");
             return output;
         }
+        Output output = new Output();
+        output.setIdPiece(id);
+        if(!thePiece.get().getColor().equals(colorTurno)){
+
+            output.setCorrect(false);
+            output.setError("Ficha incorrecta. No tiene turno");
+            return output;
+        }
+
+        output.setCorrect(true);
+
         //Creamos ficha auxiliar para hacer la busqueda de los movimientos
         Piece piece = new Piece();
         piece.setFistMovement(thePiece.get().isFistMovement());
@@ -106,15 +117,21 @@ public class Board {
         LOGGER.info("updatePiece - Entrada : {}", input);
         int id = input.getIdPiece();
 
+        Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
         Output output = new Output();
         output.setIdPiece(id);
-        output.setCorrect(true);
-
-        Optional<Piece> thePiece = pieceList.stream().filter(piece -> piece.getId() == id).findAny();
         if (thePiece.isEmpty()) {
             output.setError("No se encontró la ficha indicada");
             return output;
         }
+        if(!thePiece.get().getColor().equals(colorTurno)) {
+            output.setCorrect(false);
+            output.setError("Ficha incorrecta, no tiene el turno");
+            return output;
+        }
+        output.setCorrect(true);
+
+
 
         List<Position> theMoves = thePiece.get().getMoves(pieceList.stream().filter(piece -> !piece.isDead()).toList());
 
@@ -185,8 +202,17 @@ public class Board {
             Position newPosition = input.getNewPosition();
             thePiece.get().setPosition(newPosition);
             thePiece.get().setFistMovement(false);
+            updateTurno();
+
         }
         return output;
+    }
+
+    private void updateTurno() {
+        if(colorTurno.equals("W"))
+            colorTurno= "B";
+        else if(colorTurno.equals("B"))
+            colorTurno = "W";
     }
 
 }
