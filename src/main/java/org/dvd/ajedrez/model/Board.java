@@ -87,7 +87,7 @@ public class Board {
         }
         Output output = new Output();
         output.setIdPiece(id);
-        if(!thePiece.get().getColor().equals(colorTurno)){
+        if (!thePiece.get().getColor().equals(colorTurno)) {
 
             output.setCorrect(false);
             output.setError("Ficha incorrecta. No tiene turno");
@@ -98,7 +98,7 @@ public class Board {
 
         //Creamos ficha auxiliar para hacer la busqueda de los movimientos
         Piece piece = new Piece();
-        piece.setFistMovement(thePiece.get().isFistMovement());
+        piece.setFirstMovement(thePiece.get().isFirstMovement());
         piece.setPosition(input.getActualPosition());
         piece.setTipo(thePiece.get().getTipo());
         piece.setColor(thePiece.get().getColor());
@@ -126,16 +126,17 @@ public class Board {
             output.setCorrect(false);
             return output;
         }
-        if(!thePiece.get().getColor().equals(colorTurno)) {
+        String theColor = thePiece.get().getColor();
+        output.setColor(theColor);
+        List<Position> theMoves = thePiece.get().getMoves(pieceList.stream().filter(piece -> !piece.isDead()).toList());
+        //Comprobamos si tiene el turno
+        if (!thePiece.get().getColor().equals(colorTurno)) {
             output.setCorrect(false);
             output.setError("Ficha incorrecta, no tiene el turno");
             return output;
         }
         output.setCorrect(true);
 
-
-
-        List<Position> theMoves = thePiece.get().getMoves(pieceList.stream().filter(piece -> !piece.isDead()).toList());
 
         LOGGER.info("MOVIMIENTOS DE PIEZA - {}", theMoves);
 
@@ -146,62 +147,80 @@ public class Board {
             return output;
         }
 
-        String theColor = thePiece.get().getColor();
-        output.setColor(theColor);
-        output.setIdPiece(thePiece.get().getId());
 
-        //comprobamos si mata a alguna ficha
-        List<Piece> pieces = pieceList.stream()
-                .filter(piece -> theMoves.stream().anyMatch(position -> piece.getPosition().equals(position)))
-                .filter(piece -> !piece.isDead())
-                .toList();
-        Optional<Piece> enemy = pieces.stream().filter(piece -> piece.getPosition().equals(input.getNewPosition()) && !piece.getColor().equals(theColor)).findAny();
-
-        //Si hay enemigo y es un movimiento valido
-        enemy.ifPresent(piece -> {
-            //Matamos a una ficha
-            piece.setDead(true);
-            output.setIdPieceDeleted(piece.getId());
-
-        });
+        killEnemy(input.getNewPosition(), theColor, output, theMoves);
 
         //Comprobamos si el rey enemigo es amenazado
         Piece enemyKing = pieceList.stream().filter(piece ->
                 !piece.getColor().equals(theColor)
                         && piece.getTipo().equals("K")).findAny().get();
 
-
-        Optional<Piece> enemyCanKillKing = pieceList.stream()
-                .filter(piece -> !theColor.equals(piece.getColor()))
-                .filter(piece -> piece.canPieceMove(enemyKing.getPosition(), pieceList)).findAny();
-
-        enemyCanKillKing.ifPresent(piece -> {
+        Piece updatePiece = new Piece();
+        updatePiece.setPosition(input.getNewPosition());
+        updatePiece.setTipo(thePiece.get().getTipo());
+        updatePiece.setColor(theColor);
+        boolean canKillKing = updatePiece.canPieceMove(enemyKing.getPosition(), pieceList);
+        if (canKillKing) {
             output.setCheckKing(true);
-            String info = output.getInformation();
-            output.setInformation(info + " " + piece);
-        });
+            output.setInformation("Se amenaza al rey");
+        }
+
 
         //Comprobar si nuestro rey es amenazado
         Piece ourKing = pieceList.stream().filter(piece ->
                 piece.getColor().equals(theColor)
                         && piece.getTipo().equals("K")).findAny().get();
 
-        pieceList.stream()
+        Optional<Piece> pieceCanKillKing = pieceList.stream()
                 .filter(piece -> !theColor.equals(piece.getColor()))
+                .filter(piece -> !piece.isDead())
                 .filter(piece -> piece.canPieceMove(ourKing.getPosition(), pieceList))
-                .findAny().ifPresent(
-                        piece -> {
-                            enemy.ifPresent(pieceEnemy -> piece.setDead(false));
-                            output.restart(thePiece.get().getId(), theColor);
-                            output.setError("No se puede mover porque genera jaque en contra");
-                            output.setCorrect(false);
-                        }
-                );
+                .findAny();
+
+
+        if (pieceCanKillKing.isPresent()) {
+            pieceList.stream().filter(piece -> piece.getId()==output.getIdPieceDeleted());
+            output.restart(thePiece.get().getId(), theColor);
+            output.setError("No se puede mover porque genera jaque en contra");
+            output.setCorrect(false);
+        }
+
+        //Comprobamos si podemos salvar al rey con el movimiento del usuario.
+        boolean canSaveKing = saveKing(input.getNewPosition(), thePiece.get(), theColor, output, theMoves, ourKing);
+
+        //Si no, existe algún movimiento que pueda salvar al rey?
+        if (!canSaveKing) {
+
+            //Comprobamos todos los casos para ver si podemos salvar al rey
+            for (Piece piecesMov : pieceList) {
+
+                if (piecesMov.isDead()) {
+                    continue;
+                }
+                if (!piecesMov.getColor().equals(theColor)) {
+                    continue;
+                }
+                List<Position> moves = piecesMov.getMoves(pieceList.stream().filter(piece -> !piece.isDead()).toList());
+                boolean result = false;
+
+                for (Position newPositionP : moves) {
+                    result = saveKing(newPositionP, piecesMov, theColor, output, moves, ourKing);
+                    if (result) {
+                        break;
+                    }
+                }
+                if (result) {
+                    output.setIdPieceDeleted(0);//quitamos de la salida los id de borrar, al no
+                    break;
+                }
+
+            }
+        }
 
         //Comprobamos la posición nueva de nuestro rey genera jacque y si si, de vuelva error
         //porque no puedes mover tu rey a una posición peligrosa.
-        if(ourKing.getId() == input.getIdPiece()){
-             enemyCanKillKing = pieceList.stream()
+        if (ourKing.getId() == input.getIdPiece()) {
+            Optional<Piece> enemyCanKillKing = pieceList.stream()
                     .filter(piece -> !theColor.equals(piece.getColor()))
                     .filter(piece -> piece.canPieceMove(input.getNewPosition(), pieceList)).findAny();
 
@@ -210,22 +229,97 @@ public class Board {
                 output.setError("Movimiento invalido. El rey en peligro");
             });
         }
+        if (enemyKing.isDead()) {
+            output.setWinnerColor(theColor);
+        }
 
         //Actualizamos estado de la ficha
         if ((output.getError() == null || output.getError().isEmpty()) && output.isCorrect()) {
             Position newPosition = input.getNewPosition();
             thePiece.get().setPosition(newPosition);
-            thePiece.get().setFistMovement(false);
+            thePiece.get().setFirstMovement(false);
             updateTurno();
 
         }
         return output;
     }
 
+    private static boolean canSaveKing(Position newPosition, Piece thePiece, String theColor, Piece ourKing) {
+
+        thePiece.setPosition(newPosition);
+
+
+        //Comprobamos si hay ficha que puede matar a nuestro rey
+        Optional<Piece> pieceCanKillKing2 = pieceList.stream()
+                .filter(piece -> !piece.isDead())
+                .filter(piece -> !theColor.equals(piece.getColor()))
+                .filter(piece -> piece.canPieceMove(ourKing.getPosition(), pieceList))
+                .findAny();
+
+
+        LOGGER.info("{}", thePiece.getPosition());
+
+        return pieceCanKillKing2.isEmpty();
+
+    }
+
+    private static boolean saveKing(Position newPosition, Piece thePiece, String theColor, Output output, List<Position> theMoves, Piece ourKing) {
+        //comprobamos si el movimiento protege al rey
+        Position prePosition = thePiece.getPosition();
+
+        //matamos al enemigo si hubiera
+         killEnemy(newPosition, theColor, output, theMoves);
+
+        if (canSaveKing(newPosition, thePiece, theColor, ourKing)) {
+            output.setInformation("Se ha salvado al rey");
+            output.setError("");
+            output.setCorrect(true);
+            return true;
+        } else {
+
+            output.restart(thePiece.getId(), theColor);
+            output.setError("No se puede mover porque genera jaque en contra, no se puede salvar moviendo");
+            output.setCorrect(false);
+            thePiece.setPosition(prePosition);
+            return false;
+        }
+
+    }
+
+    private static Optional<Piece> getEnemyCanKill(Position input, String theColor, Output output, List<Position> theMoves){
+        List<Piece> pieces = pieceList.stream() //lista de piezas que no están muertas y están en nuestros posibles movimientos
+                .filter(piece -> theMoves.stream().anyMatch(position -> piece.getPosition().equals(position)))
+                .filter(piece -> !piece.isDead())
+                .toList();
+        return pieces.stream().filter(piece -> piece.getPosition().equals(input) && !piece.getColor().equals(theColor)).findAny();
+
+    }
+    private static boolean canKillEnemy(Position input, String theColor, Output output, List<Position> theMoves) {
+        //comprobamos si mata a alguna ficha
+        Optional<Piece> enemy =  getEnemyCanKill(input,theColor,output,theMoves);
+        enemy.ifPresent(piece -> output.setIdPieceDeleted(piece.getId()));
+
+        return enemy.isPresent();
+    }
+
+    private static void killEnemy(Position input, String theColor, Output output, List<Position> theMoves) {
+        //comprobamos si mata a alguna ficha
+        boolean canKillEnemy = canKillEnemy(input, theColor, output, theMoves);
+        //Si hay enemigo y es un movimiento valido
+        if (canKillEnemy) {
+            //Matamos a una ficha
+            Piece enemy = pieceList.stream().filter(piece -> piece.getId() == output.getIdPieceDeleted()).findAny().get();
+            enemy.setDead(true);
+
+        } else {
+            output.setIdPieceDeleted(0);
+        }
+    }
+
     private void updateTurno() {
-        if(colorTurno.equals("W"))
-            colorTurno= "B";
-        else if(colorTurno.equals("B"))
+        if (colorTurno.equals("W"))
+            colorTurno = "B";
+        else if (colorTurno.equals("B"))
             colorTurno = "W";
     }
 

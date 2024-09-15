@@ -228,6 +228,7 @@ public class BoardView {
             //todo implementar condicion para ganar
             //todo implementar movimientos especiales
 
+
             Input input = new Input();
             input.setIdPiece(selectedboxes.getPieceView().getId());
             input.setActualPosition(new Position(selectedboxes.getX(), selectedboxes.getY()));
@@ -255,6 +256,16 @@ public class BoardView {
                 selectedboxes.setPieceView(null);
 
 
+                String winnerColor = output.getWinnerColor();
+                if(winnerColor !=null){
+                    if(winnerColor.equals("B")){
+                        winnerColor = "NEGRO";
+                    }else{
+                        winnerColor = "BLANCO";
+                    }
+                    LOGGER.info("Ha ganado el color {}", winnerColor);
+                    return;
+                }
             }
             //Quitamos selección
             selectedboxes = null;

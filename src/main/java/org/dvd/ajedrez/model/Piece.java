@@ -19,7 +19,7 @@ public class Piece {
     private String color;
     private boolean isDead;
     private boolean attack;
-    private boolean fistMovement;
+    private boolean firstMovement;
 
     public Piece(int id, int x, int y, String tipo, String color) {
         this.id = id;
@@ -28,7 +28,7 @@ public class Piece {
         this.color = color;
         this.isDead = false;
         if ("P".equals(tipo)) {
-            fistMovement = true;
+            firstMovement = true;
         }
     }
 
@@ -37,12 +37,12 @@ public class Piece {
 
     }
 
-    public boolean isFistMovement() {
-        return fistMovement;
+    public boolean isFirstMovement() {
+        return firstMovement;
     }
 
-    public void setFistMovement(boolean fistMovement) {
-        this.fistMovement = fistMovement;
+    public void setFirstMovement(boolean firstMovement) {
+        this.firstMovement = firstMovement;
     }
 
     public boolean isAttack() {
@@ -158,7 +158,7 @@ public class Piece {
                 }
                 break;
             case "P"://Peon
-                Optional<Position> pawnPosition = getPawnMovesAtack().stream()
+                Optional<Position> pawnPosition = getPawnMovesAttack().stream()
                         .filter(position1 -> position1.equals(newPosition)).findAny();
                 if (pawnPosition.isPresent()) {
                     return true;
@@ -199,7 +199,7 @@ public class Piece {
         return salida.stream().filter(Position::isValid).toList();
     }
 
-    public List<Position> getPawnMovesAtack() {
+    public List<Position> getPawnMovesAttack() {
         List<Position> positions = new LinkedList<>();
 
         if (color.equals("B")) {
@@ -218,7 +218,7 @@ public class Piece {
 
     }
 
-    public List<Position> getPawnMovesAtack(List<Piece> pieceList) {
+    public List<Position> getPawnMovesAttack(List<Piece> pieceList) {
         List<Position> positions = new LinkedList<>();
 
 
@@ -288,7 +288,7 @@ public class Piece {
                 }
             }
 
-            if (fistMovement && pieceIn2Front == null && pieceInFront == null) {
+            if (firstMovement && pieceIn2Front == null && pieceInFront == null) {
                 positions.add(new Position(position.getX(), position.getY() + 2));
 
             }
@@ -309,7 +309,7 @@ public class Piece {
                 }
             }
 
-            if (fistMovement && pieceIn2Front == null) {
+            if (firstMovement && pieceIn2Front == null) {
                 positions.add(new Position(position.getX(), position.getY() - 2));
 
             }
@@ -324,7 +324,7 @@ public class Piece {
 
     public List<Position> getPawnAll(List<Piece> pieceList) {
 
-        return concatenarList(getPawnMoves(pieceList), getPawnMovesAtack(pieceList)
+        return concatenarList(getPawnMoves(pieceList), getPawnMovesAttack(pieceList)
         );
     }
 
@@ -383,13 +383,8 @@ public class Piece {
     }
 
     private static List<Position> concatenarList(List<Position> positionsAllies, List<Position> positionsAllies2) {
-        List<Position> concatenatedList = new ArrayList<>();
-        for (Position item : positionsAllies) {
-            concatenatedList.add(item);
-        }
-        for (Position item : positionsAllies2) {
-            concatenatedList.add(item);
-        }
+        List<Position> concatenatedList = new ArrayList<>(positionsAllies);
+        concatenatedList.addAll(positionsAllies2);
         return concatenatedList;
     }
 
